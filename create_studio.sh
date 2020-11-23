@@ -20,15 +20,13 @@ fi
 echo "Please enter the name for the studio. (e.g. my-awesome-studio)"
 read studio_name
 
-
-#TODO: replace dependency_template_url with public S3 link
-dependency_template_url='https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/full_studio_dependencies.yml'
+curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/full_studio_dependencies.yml --output full_studio_dependencies.yml
 
 stack_name=emr-studio-dependencies
 echo "Creating a cloudformation stack: $stack_name to provision dependencies for the studio. This can take a few minutes..."
 aws cloudformation --region $region \
 create-stack --stack-name $stack_name \
---template-url $dependency_template_url \
+--template-body 'file://full_studio_dependencies.yml' \
 --capabilities CAPABILITY_NAMED_IAM
 
 
