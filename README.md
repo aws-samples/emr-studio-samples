@@ -1,11 +1,6 @@
-## My Project
+## EMR Studio Samples
 
-TODO: Fill this README out!
-
-Be sure to:
-
-* Change the title in this README
-* Edit your repository description on GitHub
+This repo contains samples for EMR Studio feature.
 
 ## Security
 
