@@ -1,0 +1,46 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  SubnetId:
+    Type: "String"
+  ClusterName:
+    Type: "String"
+    Default: "Example_One_Node_Cluster"
+  EmrRelease:
+    Type: "String"
+    Default: "emr-6.2.0"
+  ClusterInstanceType:
+    Type: "String"
+    Default: "m5.xlarge"
+
+Resources:
+  EmrCluster:
+    Type: AWS::EMR::Cluster
+    Properties:
+      Applications:
+      - Name: Spark
+      - Name: Livy
+      - Name: JupyterEnterpriseGateway
+      - Name: Hive
+      EbsRootVolumeSize: '10'
+      Name: !Ref ClusterName
+      JobFlowRole: EMR_EC2_DefaultRole
+      ServiceRole: EMR_DefaultRole
+      ReleaseLabel: !Ref EmrRelease
+      VisibleToAllUsers: true
+      LogUri: 
+        Fn::Sub: 's3://aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/'
+      Instances:
+        TerminationProtected: false
+        Ec2SubnetId: !Ref SubnetId
+        MasterInstanceGroup:
+          InstanceCount: 1
+          InstanceType: !Ref ClusterInstanceType
+
+Outputs:
+  ClusterId:
+    Value:
+      Ref: EmrCluster
+    Description: The ID of the EMR Cluster
