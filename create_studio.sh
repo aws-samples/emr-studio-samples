@@ -8,7 +8,7 @@
 echo "Please enter the region where the studio will be created. (e.g. us-east-1)"
 read region
 
-#sanity check if SSO is enabled in this region
+# Sanity check if customer has enabled AWS SSO is in this region
 aws sso-admin list-instances --region $region > /dev/null
 retVal=$?
 if [ $retVal -ne 0 ]; then
