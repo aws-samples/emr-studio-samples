@@ -31,7 +31,7 @@ create-stack --stack-name $stack_name \
 
 
 
-# wait till dependencies are provisioned
+# Wait till dependencies are provisioned
 status=""
 while [ "$status" != "CREATE_COMPLETE" ]
 do
@@ -41,7 +41,7 @@ do
     break
   elif [[ "$status" != "CREATE_IN_PROGRESS" ]]
   then
-    echo "Cloudformation stack failed. Please fix the cause, delete the failed stack and try again."
+    echo "Cloudformation stack failed. Please fix the cause, delete the failed stack ($stack_name) and try again."
     exit 1
   else
     echo "Wait for cloudformation to finish. Current status: $status"
@@ -52,7 +52,7 @@ done
 
 outputs=$(aws cloudformation --region $region describe-stacks --stack-name $stack_name --query "Stacks[0].Outputs" --output json)
 
-# update engine security group as Cloudformation does not support zero-egress SGs
+# Update engine security group as Cloudformation does not support zero-egress SGs
 engine_sg=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EngineSecurityGroup") | .OutputValue')
 aws ec2 --region $region revoke-security-group-egress --group-id "$engine_sg" --protocol all --port all --cidr 0.0.0.0/0
 
