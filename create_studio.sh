@@ -27,7 +27,7 @@
 echo "Enter the code for the AWS Region in which you want to create the Studio. For example, us-east-1."
 read region
 
-# Check that AWS SSO is enabled in the specified AWS Region
+# Verify that the user has enabled AWS SSO in the specified AWS Region
 aws sso-admin list-instances --region $region > /dev/null
 retVal=$?
 if [ $retVal -ne 0 ]; then
