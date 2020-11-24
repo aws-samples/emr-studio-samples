@@ -11,7 +11,7 @@ This repo contains samples for EMR Studio feature.
 4. Git clone this repo or only download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh) via either
  * ```git clone https://github.com/aws-samples/emr-studio-samples.git```
  * ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh --output create_studio.sh```
-5. Run in terminal: ```bash create_studio.sh```
+5. In the terminal, navigate to the directory where creae_studio.sh is in, run: ```bash create_studio.sh```
 
 
 
