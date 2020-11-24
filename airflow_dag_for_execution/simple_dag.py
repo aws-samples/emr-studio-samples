@@ -1,7 +1,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-# This file creates a simplest DAG that performs 4 tasks
+# This file creates a simple Airflow DAG that performs 4 tasks:
 # 1. Create an EMR cluster
 # 2. Poll until the cluster is in WAITING state
 # 3. Start a Notebook execution using the cluster created
