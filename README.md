@@ -19,25 +19,25 @@ You can submit feedback and requests for changes by opening an issue in this rep
 7. Run: ```bash create_studio.sh```
 
 ## Bring your own S3 bucket, VPC and cluster templates
-If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use the ``min_studio_dependencies.yml`` to create the resource stack for your Studio. The created stack contains only service role, user role, three session policies and two securigy groups. 
+If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use ``min_studio_dependencies.yml`` to create a minimum resource stack for your Studio. This stack contains only one service role, one user role, three example session policies and two securigy groups, which are needed to create an EMR Studio. 
 
 
 1. If you did not clone the repository, download ``min_studio_dependencies.yml`` on your local machine using the following command: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/min_studio_dependencies.yml -o min_studio_dependencies.yml```.
 2. Create a new Cloudformation stack with ```min_studio_dependencies.yml``` via AWS Management console or AWS CLI. (fill your VPC Id for the stack parameter ```VPC```)
-3. Remove the egress rule of ```EngineSecurityGroup```
+3. Remove the egress rule of ```EngineSecurityGroup``` (Unfortunately Cloudformation does not support creating 0-egress security group).
 4. Note down the Cloudformation stack outputs: ``EMRStudioServiceRoleArn, EMRStudioUserRoleArn, EngineSecurityGroup and WorkspaceSecurityGroup``
 4. Run
 ```
 aws emr create-studio --region $region \
 --name $studio_name \
 --auth-mode SSO \
---vpc-id $vpc \
---subnet-ids $private_subnet_with_NAT_1 $private_subnet_with_NAT_2 \
---service-role $service_role_from_cloudformation \
---user-role $user_role_from_cloudformation \
---workspace-security-group-id $workspace_sg_from_cloudformation \
---engine-security-group-id $engine_sg_from_cloudformation \
---default-s3-location s3://$storage_bucket
+--vpc-id $your_vpc \
+--subnet-ids $your_subnet_1 $your_subnet_2 \
+--service-role $service_role \
+--user-role $user_role_from \
+--workspace-security-group-id $workspace_sg \
+--engine-security-group-id $engine_sg_from \
+--default-s3-location s3://$your_s3_bucket
 ```
 
 ## Security
