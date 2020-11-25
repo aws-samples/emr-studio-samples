@@ -28,7 +28,7 @@ echo "Enter the code for the AWS Region in which you want to create the Studio. 
 read region
 
 # Verify that the user has enabled AWS SSO in the specified AWS Region
-aws sso-admin list-instances --region $region > /dev/null
+aws sso-admin list-instances --region $region > /dev/null 2>&1
 retVal=$?
 if [ $retVal -ne 0 ]; then
     echo "SSO is not enabled in the specified Region: $region. Enable SSO in $region and try again."
@@ -44,11 +44,21 @@ curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/full_
 
 # Provision the Studio resource stack using AWS CloudFormation
 stack_name=emr-studio-dependencies
-echo "Creating the following CloudFormation stack to provision dependencies for the Studio: $stack_name. This takes a few minutes..."
-aws cloudformation --region $region \
-create-stack --stack-name $stack_name \
---template-body 'file://full_studio_dependencies.yml' \
---capabilities CAPABILITY_NAMED_IAM
+
+aws cloudformation --region $region describe-stacks --stack-name $stack_name > /dev/null 2>&1
+retVal=$?
+
+if [ $retVal -ne 0 ]; then
+  echo "Creating the following CloudFormation stack to provision dependencies for the Studio: $stack_name. This takes a few minutes..."
+  aws cloudformation --region $region \
+  create-stack --stack-name $stack_name \
+  --template-body 'file://full_studio_dependencies.yml' \
+  --capabilities CAPABILITY_NAMED_IAM
+else
+  echo "There is an existing dependency Cloudformation stack: $stack_name. Resuming with that stack."
+fi
+
+exit 1
 
 # Check whether the resource stack has been created
 status=""
