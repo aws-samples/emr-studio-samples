@@ -19,13 +19,13 @@ You can submit feedback and requests for changes by opening an issue in this rep
 7. Run: ```bash create_studio.sh```
 
 ## Bring your own S3 bucket, VPC and cluster templates
-If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use the '''min_studio_dependencies.yml''' to create the resource stack for your Studio. The created stack contains only service role, user role, three session policies and two securigy groups. 
+If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use the ``min_studio_dependencies.yml`` to create the resource stack for your Studio. The created stack contains only service role, user role, three session policies and two securigy groups. 
 
 
-1. If you did not clone the repository, download ```min_studio_dependencies.yml``` on your local machine using the following command: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/min_studio_dependencies.yml -o min_studio_dependencies.yml```.
+1. If you did not clone the repository, download ``min_studio_dependencies.yml`` on your local machine using the following command: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/min_studio_dependencies.yml -o min_studio_dependencies.yml```.
 2. Create a new Cloudformation stack with ```min_studio_dependencies.yml``` via AWS Management console or AWS CLI. (fill your VPC Id for the stack parameter ```VPC```)
 3. Remove the egress rule of ```EngineSecurityGroup```
-4. Note down the Cloudformation stack outputs: EMRStudioServiceRoleArn, EMRStudioUserRoleArn, EngineSecurityGroup and WorkspaceSecurityGroup
+4. Note down the Cloudformation stack outputs: ``EMRStudioServiceRoleArn, EMRStudioUserRoleArn, EngineSecurityGroup and WorkspaceSecurityGroup``
 4. Run
 ```
 aws emr create-studio --region $region \
