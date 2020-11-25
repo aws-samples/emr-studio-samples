@@ -23,7 +23,7 @@ If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Serv
 
 
 1. If you did not clone the repository, download ``min_studio_dependencies.yml`` on your local machine using the following command: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/min_studio_dependencies.yml -o min_studio_dependencies.yml```.
-2. Create a new Cloudformation stack with ```min_studio_dependencies.yml``` via AWS Management console or AWS CLI. (fill your VPC Id for the stack parameter ```VPC```)
+2. Create a new Cloudformation stack with ```min_studio_dependencies.yml``` via AWS Management console or AWS CLI. (Provide VPC Id for the stack parameter ```VPC```)
 3. Remove the egress rule of ```EngineSecurityGroup``` (Unfortunately Cloudformation does not support creating 0-egress security group).
 4. Note down the Cloudformation stack outputs: ``EMRStudioServiceRoleArn, EMRStudioUserRoleArn, EngineSecurityGroup and WorkspaceSecurityGroup``
 4. Run
