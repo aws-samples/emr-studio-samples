@@ -58,7 +58,6 @@ else
   echo "There is an existing dependency Cloudformation stack: $stack_name. Resuming with that stack."
 fi
 
-exit 1
 
 # Check whether the resource stack has been created
 status=""
