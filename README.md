@@ -34,9 +34,9 @@ aws emr create-studio --region $region \
 --vpc-id $your_vpc \
 --subnet-ids $your_subnet_1 $your_subnet_2 \
 --service-role $service_role \
---user-role $user_role_from \
+--user-role $user_rolem \
 --workspace-security-group-id $workspace_sg \
---engine-security-group-id $engine_sg_from \
+--engine-security-group-id $engine_sg \
 --default-s3-location s3://$your_s3_bucket
 ```
 
