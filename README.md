@@ -18,15 +18,27 @@ You can submit feedback and requests for changes by opening an issue in this rep
 6. In the terminal, navigate to the directory where you saved `create_studio.sh`. 
 7. Run: ```bash create_studio.sh```
 
-## Modifying the EMR Studio dependency stack created by create_studio.sh
-Charges accrue for the AWS resources (VPC, subnets, AWS Service Catalog portfolio of templates) that ```create_studio.sh``` provisions. Use the following instructions to customize the resource stack for your Studio. For example, you might want to use ``create_studio.sh`` to provision the default IAM roles and security groups for EMR Studio, but use your own VPC, subnets, and cluster templates. You can remove the network and AWS Service Catalog resources from ```full_studio_dependencies.yml```, and update ```create-studio.sh``` accordingly.
-1. If you did not clone the repository, download ```full_studio_dependencies.yml``` to the same location on your local machine using the following command: ```curl https://rawgithubusercontent.com/aws-samples/emr-studio-samples/main/full_studio_dependencies.yml```.
-2. Open ```full_studio_dependencies.yml``` in your editor of choice.
-3. Modify resource definitions or remove unwanted resources from the template. For example, you might remove all of the network resources if you want to supply your own VPC and subnets.
-5. Open ```create_studio.sh``` in your editor of choice. 
-6. Comment out line 43 ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/full_studio_dependencies.yml --output full_studio_dependencies.yml``` since ```create-studio.sh``` will use your local, modified version of ```full_studio_dependencies.yml```.
-7. Replace the variable values in lines 97-105 to specify your custom values to the ```create-studio``` CLI command. For example, replace ```--vpc-id $vpc``` with ```--vpc-id <your-vpc-id>``` to supply the ID of the VPC you want to associate with the Studio. For more information about ```create-studio``` requirements, see [create-studio](https://docs.aws.amazon.com/cli/latest/reference/emr/create-studio.html) in the *AWS CLI Command Reference*.
-6. Save your changes and run create-studio using ```base create_studio.sh```.
+## Bring your own S3 bucket, VPC and cluster templates
+If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use the '''min_studio_dependencies.yml''' to create the resource stack for your Studio. The created stack contains only service role, user role, three session policies and two securigy groups. 
+
+
+1. If you did not clone the repository, download ```min_studio_dependencies.yml``` on your local machine using the following command: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/min_studio_dependencies.yml -o min_studio_dependencies.yml```.
+2. Create a new Cloudformation stack with ```min_studio_dependencies.yml``` via AWS Management console or AWS CLI. (fill your VPC Id for the stack parameter ```VPC```)
+3. Remove the egress rule of ```EngineSecurityGroup```
+4. Note down the Cloudformation stack outputs: EMRStudioServiceRoleArn, EMRStudioUserRoleArn, EngineSecurityGroup and WorkspaceSecurityGroup
+4. Run
+```
+aws emr create-studio --region $region \
+--name $studio_name \
+--auth-mode SSO \
+--vpc-id $vpc \
+--subnet-ids $private_subnet_with_NAT_1 $private_subnet_with_NAT_2 \
+--service-role $service_role_from_cloudformation \
+--user-role $user_role_from_cloudformation \
+--workspace-security-group-id $workspace_sg_from_cloudformation \
+--engine-security-group-id $engine_sg_from_cloudformation \
+--default-s3-location s3://$storage_bucket
+```
 
 ## Security
 
