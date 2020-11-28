@@ -18,7 +18,7 @@ You can submit feedback and requests for changes by opening an issue in this rep
 6. In the terminal, navigate to the directory where you saved `create_studio.sh`. 
 7. Run: ```bash create_studio.sh```
 
-## Bring your own S3 bucket, VPC and cluster templates
+## Creating an EMR Studio using your own S3 bucket, VPC and cluster templates
 If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use ``min_studio_dependencies.yml`` to create a minimum resource stack for your Studio. This stack contains only one service role, one user role, three example session policies and two securigy groups, which are needed to create an EMR Studio. 
 
 
