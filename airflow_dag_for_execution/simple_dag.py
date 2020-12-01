@@ -115,7 +115,7 @@ def start_execution(**context):
     start_resp = emr.start_notebook_execution(
         EditorId=editor_id,
         RelativePath=relative_path,
-        ExecutionEngine={'Id': cluster_id},
+        ExecutionEngine={'Id': cluster_id, 'Type': 'EMR'},
         ServiceRole='EMR_Notebooks_DefaultRole'
     )
 
