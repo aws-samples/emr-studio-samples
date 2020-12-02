@@ -104,7 +104,7 @@ studio_outputs=$(aws emr create-studio --region $region \
 --user-role $user_role \
 --workspace-security-group-id $workspace_sg \
 --engine-security-group-id $engine_sg \
---default-s3-location s3://$storage_bucket 
+--default-s3-location s3://$storage_bucket \
 --output text)
 
 studio_id=$(echo $studio_outputs | tr " " "\n" | head -n1)
