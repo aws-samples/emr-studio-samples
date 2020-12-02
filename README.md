@@ -9,14 +9,13 @@ You can submit feedback and requests for changes by opening an issue in this rep
 
 
 1. Set up the EMR Studio prerequisites described in the [Set Up an EMR Studio](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-set-up.html) section of the *Amazon EMR Management Guide*.
-2. Make sure you have [jq](https://stedolan.github.io/jq/) installed. The script uses jq to parse and display AWS CLI output.
-3. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
-4. Make sure your AWS CLI version is equal or later than [awscli-1.18.184](https://github.com/aws/aws-cli/releases/tag/1.18.184)
-5. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh) using one of the following commands:
+2. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+3. Make sure your AWS CLI version is equal or later than [awscli-1.18.184](https://github.com/aws/aws-cli/releases/tag/1.18.184)
+4. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh) using one of the following commands:
    * Clone: ```git clone https://github.com/aws-samples/emr-studio-samples.git```
    * Download: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh --output create_studio.sh```
-6. In the terminal, navigate to the directory where you saved `create_studio.sh`. 
-7. Run: ```bash create_studio.sh```
+5. In the terminal, navigate to the directory where you saved `create_studio.sh`. 
+6. Run: ```bash create_studio.sh```
 
 ## Creating an EMR Studio using your own S3 bucket, VPC and cluster templates
 If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use ``min_studio_dependencies.yml`` to create a minimum resource stack for your Studio. This stack contains only one service role, one user role, three example session policies and two securigy groups, which are needed to create an EMR Studio. 
