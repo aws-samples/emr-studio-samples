@@ -18,9 +18,6 @@
 #    - The default Amazon EMR IAM roles, security groups,
 #      and Amazon S3 logging bucket must already exist in the AWS Region 
 #      where you want to create the Studio.
-#    - You must have the jq command-line JSON processer installed 
-#      (https://stedolan.github.io/jq/download). The script uses jq to
-#      parse and display AWS CLI return values.
 
 
 # Read AWS Region
@@ -58,7 +55,6 @@ else
   echo "There is an existing dependency Cloudformation stack: $stack_name. Resuming with that stack."
 fi
 
-
 # Check whether the resource stack has been created
 status=""
 while [ "$status" != "CREATE_COMPLETE" ]
@@ -66,6 +62,7 @@ do
   status=$(aws cloudformation --region $region describe-stacks --stack-name $stack_name --query "Stacks[0].StackStatus" --output text)
   if [[ "$status" == "CREATE_COMPLETE" ]]
   then
+    echo "Dependency Cloudfomaton stack has completed."
     break
   elif [[ "$status" != "CREATE_IN_PROGRESS" ]]
   then
@@ -79,29 +76,25 @@ do
 done
 
 # Return the resource stack details
-outputs=$(aws cloudformation --region $region describe-stacks --stack-name $stack_name --query "Stacks[0].Outputs" --output json)
+outputs=$(aws cloudformation --region $region describe-stacks --stack-name $stack_name --query "Stacks[0].Outputs" --output text)
 
-# Update the engine security group to remove all outbound traffic rules
-engine_sg=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EngineSecurityGroup") | .OutputValue')
-aws ec2 --region $region revoke-security-group-egress --group-id "$engine_sg" --protocol all --port all --cidr 0.0.0.0/0
+# Remove the default allow-all egress rule of engine security group
+engine_sg=$(echo $outputs | tr " " "\n" | grep -A 1 'EngineSecurityGroup' | tail -n1)
+aws ec2 --region $region revoke-security-group-egress --group-id $engine_sg --protocol all --port all --cidr 0.0.0.0/0  > /dev/null 2>&1
 
 # Create the Studio
-echo "Creating a new EMR Studio with the following dependencies:"
-echo "------------------------------------------------------------"
-echo $outputs | jq -r '.[] | "\(.OutputKey)\t\(.OutputValue)"'
-echo "------------------------------------------------------------"
+vpc=$(echo $outputs | tr " " "\n" | grep -A 1 'VPC' | tail -n1)
+private_subnet_1=$(echo $outputs | tr " " "\n" | grep -A 1 'PrivateSubnet1' | tail -n1) 
+private_subnet_2=$(echo $outputs | tr " " "\n" | grep -A 1 'PrivateSubnet2' | tail -n1) 
+service_role=$(echo $outputs | tr " " "\n" | grep -A 1 'EMRStudioServiceRoleArn' | tail -n1)
+user_role=$(echo $outputs | tr " " "\n" | grep -A 1 'EMRStudioUserRoleArn' | tail -n1)
+workspace_sg=$(echo $outputs | tr " " "\n" | grep -A 1 'WorkspaceSecurityGroup' | tail -n1)
+engine_sg=$(echo $outputs | tr " " "\n" | grep -A 1 'EngineSecurityGroup' | tail -n1)
+storage_bucket=$(echo $outputs | tr " " "\n" | grep -A 1 'EmrStudioStorageBucket' | tail -n1)
 
-vpc=$(echo $outputs | jq -r '.[] | select(.OutputKey=="VPC") | .OutputValue')
-private_subnet_1=$(echo $outputs | jq -r '.[] | select(.OutputKey=="PrivateSubnet1") | .OutputValue')
-private_subnet_2=$(echo $outputs | jq -r '.[] | select(.OutputKey=="PrivateSubnet2") | .OutputValue')
-service_role=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EMRStudioServiceRoleArn") | .OutputValue')
-user_role=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EMRStudioUserRoleArn") | .OutputValue')
-workspace_sg=$(echo $outputs | jq -r '.[] | select(.OutputKey=="WorkspaceSecurityGroup") | .OutputValue')
-storage_bucket=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EmrStudioStorageBucket") | .OutputValue')
-
+echo "Creating a studio with $vpc, $private_subnet_1, $private_subnet_2, $service_role, $user_role, $workspace_sg, $engine_sg"
 echo "......"
 
-# Return details about the new Studio
 studio_outputs=$(aws emr create-studio --region $region \
 --name $studio_name \
 --auth-mode SSO \
@@ -111,16 +104,16 @@ studio_outputs=$(aws emr create-studio --region $region \
 --user-role $user_role \
 --workspace-security-group-id $workspace_sg \
 --engine-security-group-id $engine_sg \
---default-s3-location s3://$storage_bucket --output json)
+--default-s3-location s3://$storage_bucket 
+--output text)
 
+studio_id=$(echo $studio_outputs | tr " " "\n" | head -n1)
+studio_url=$(echo $studio_outputs | tr " " "\n"  | tail -n1)
 
-studio_id=$(echo $studio_outputs | jq -r '.["StudioId"]')
-studio_url=$(echo $studio_outputs | jq -r '.["Url"]')
 
 # Return additional information about managing the Studio
 echo "Successfully created an EMR Studio with this ID: $studio_id"
 echo "Users can log in to the Studio with this access URL: $studio_url"
-printf "\n"
 
 echo "To fetch details about the Studio, use:"
 printf "aws emr describe-studio --region $region --studio-id $studio_id"
@@ -135,9 +128,10 @@ echo "aws emr delete-studio --region $region --studio-id $studio_id"
 printf "\n"
 
 echo "Specify one of the following session policies when you assign a user or group to the Studio: "
-basic_policy=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EMRStudioBasicUserPolicyArn") | .OutputValue')
-intermediate_policy=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EMRStudioIntermediateUserPolicyArn") | .OutputValue')
-advanced_policy=$(echo $outputs | jq -r '.[] | select(.OutputKey=="EMRStudioAdvancedUserPolicyArn") | .OutputValue')
+basic_policy=$(echo $outputs | tr " " "\n" | grep -A 1 'EMRStudioBasicUserPolicyArn' | tail -n1)
+intermediate_policy=$(echo $outputs | tr " " "\n" | grep -A 1 'EMRStudioIntermediateUserPolicyArn' | tail -n1)
+advanced_policy=$(echo $outputs | tr " " "\n" | grep -A 1 'EMRStudioAdvancedUserPolicyArn' | tail -n1)
+
 echo "------------------------------------------------------------"
 echo $basic_policy
 echo $intermediate_policy
