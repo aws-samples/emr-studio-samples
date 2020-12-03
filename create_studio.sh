@@ -139,8 +139,8 @@ echo $advanced_policy ;
 echo "------------------------------------------------------------"
 
 printf "\n"
-echo "To assign a user (for example, hello@world) to the Studio and attach a session policy, use:"
-echo "aws emr create-studio-session-mapping --region $region --studio-id $studio_id --identity-name hello@world --identity-type USER --session-policy-arn $advanced_policy"
+echo "To assign a user to the Studio and attach a session policy, use:"
+echo "aws emr create-studio-session-mapping --region $region --studio-id $studio_id --identity-name johndoe@enterprise.com --identity-type USER --session-policy-arn $advanced_policy"
 
 printf "\n"
 echo "To assign a group (for example, data-org) to the Studio and attach a session policy, use:"
