@@ -92,6 +92,7 @@ Resources:
               - 'sts:AssumeRole'
       Description: "User role for EMR Studio"
 
+
   EMRStudioBasicUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
     Properties:
@@ -131,10 +132,14 @@ Resources:
           - "s3:ListAllMyBuckets"  
           - "s3:ListBucket"  
           - "s3:GetObject"  
-          - "s3:GetBucketLocation"  
-          - "iam:PassRole"  
+          - "s3:GetBucketLocation"
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
+        - Sid: PassRolePermission
+          Effect: Allow
+          Resource: 
+          - !GetAtt EMRStudioServiceRole.Arn
+          Action: "iam:PassRole"  
 
   EMRStudioIntermediateUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -176,7 +181,6 @@ Resources:
           - "s3:ListBucket"  
           - "s3:GetObject"  
           - "s3:GetBucketLocation"  
-          - "iam:PassRole"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
         - Sid: AllowIntermediateActions
@@ -194,6 +198,11 @@ Resources:
           - "servicecatalog:ListProvisioningArtifacts"
           - "servicecatalog:DescribeRecord"
           - "cloudformation:DescribeStackResources"
+        - Sid: PassRolePermission
+          Effect: Allow
+          Resource: 
+          - !GetAtt EMRStudioServiceRole.Arn
+          Action: "iam:PassRole"  
 
   EMRStudioAdvancedUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -235,7 +244,6 @@ Resources:
           - "s3:ListBucket"  
           - "s3:GetObject"  
           - "s3:GetBucketLocation"  
-          - "iam:PassRole"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
         - Sid: AllowIntermediateActions
@@ -258,6 +266,14 @@ Resources:
           Resource: "*"
           Action:
           - "elasticmapreduce:RunJobFlow"
+        - Sid: PassRolePermission
+          Effect: Allow
+          Resource: 
+          - !GetAtt EMRStudioServiceRole.Arn
+          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
+          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole
+          Action: "iam:PassRole"  
+
 
   # Security Groups
   WorkspaceSecurityGroup:
