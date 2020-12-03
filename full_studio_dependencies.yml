@@ -322,27 +322,34 @@ Resources:
               - 'sts:AssumeRole'
       Description: "Launch constraint role"
       RoleName: ClusterTemplateLaunchRole
-      Policies:
-      - PolicyName: CloudformationPermission
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Resource: "*"
-            Action:
-            - "cloudformation:CreateStack"
-            - "cloudformation:DeleteStack"
-            - "cloudformation:DescribeStackEvents"
-            - "cloudformation:DescribeStacks"
-            - "cloudformation:GetTemplateSummary"
-            - "cloudformation:SetStackPolicy"
-            - "cloudformation:ValidateTemplate"
-            - "cloudformation:UpdateStack"
-            - "elasticmapreduce:*"
-            - "s3:GetObject"
-            - "servicecatalog:*"
-            - "iam:passRole"
-  
+
+  ClusterTemplateLaunchConstraintPolicy:
+    Type: "AWS::IAM::ManagedPolicy"
+    Properties:
+      Roles:
+      - Ref: "ClusterTemplateLaunchRole"
+      ManagedPolicyName: ClusterTemplateLaunchConstraintPolicy
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Resource: "*"
+          Action:
+          - "cloudformation:CreateStack"
+          - "cloudformation:DeleteStack"
+          - "cloudformation:DescribeStackEvents"
+          - "cloudformation:DescribeStacks"
+          - "cloudformation:GetTemplateSummary"
+          - "cloudformation:SetStackPolicy"
+          - "cloudformation:ValidateTemplate"
+          - "cloudformation:UpdateStack"
+          - "elasticmapreduce:RunJobFlow"
+        - Effect: Allow
+          Resource:
+          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
+          Action:
+          - "iam:passRole"
+
   ClusterTemplatePortfolio:
     Type: "AWS::ServiceCatalog::Portfolio"
     Properties:
