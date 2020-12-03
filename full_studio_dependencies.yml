@@ -133,14 +133,21 @@ Resources:
           Resource: 
           - !GetAtt EMRStudioServiceRole.Arn
           Action: "iam:PassRole"  
-        - Sid: S3Permission
+        - Sid: S3ListPermission
           Effect: Allow
           Resource: "arn:aws:s3:::*"
           Action:
           - "s3:ListAllMyBuckets"  
           - "s3:ListBucket"  
-          - "s3:GetObject"  
           - "s3:GetBucketLocation"
+        - Sid: S3GetObjectPermission
+          Effect: Allow
+          Resource: 
+          - !Sub 'arn:aws:s3:::emr-studio-dependencies-emrstudiostoragebucket-*/*'
+          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
+          Action:
+          - "s3:GetObject"  
+          
 
   EMRStudioIntermediateUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -199,14 +206,20 @@ Resources:
           Resource: 
           - !GetAtt EMRStudioServiceRole.Arn
           Action: "iam:PassRole"  
-        - Sid: S3Permission
+        - Sid: S3ListPermission
           Effect: Allow
           Resource: "arn:aws:s3:::*"
           Action:
           - "s3:ListAllMyBuckets"  
           - "s3:ListBucket"  
-          - "s3:GetObject"  
           - "s3:GetBucketLocation"
+        - Sid: S3GetObjectPermission
+          Effect: Allow
+          Resource: 
+          - !Sub 'arn:aws:s3:::emr-studio-dependencies-emrstudiostoragebucket-*/*'
+          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
+          Action:
+          - "s3:GetObject"
 
   EMRStudioAdvancedUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -272,14 +285,20 @@ Resources:
           - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
           - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole
           Action: "iam:PassRole"  
-        - Sid: S3Permission
+        - Sid: S3ListPermission
           Effect: Allow
           Resource: "arn:aws:s3:::*"
           Action:
           - "s3:ListAllMyBuckets"  
           - "s3:ListBucket"  
-          - "s3:GetObject"  
           - "s3:GetBucketLocation"
+        - Sid: S3GetObjectPermission
+          Effect: Allow
+          Resource: 
+          - !Sub 'arn:aws:s3:::emr-studio-dependencies-emrstudiostoragebucket-*/*'
+          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
+          Action:
+          - "s3:GetObject"
 
   # Security Groups
   WorkspaceSecurityGroup:
