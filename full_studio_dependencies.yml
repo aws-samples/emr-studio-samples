@@ -331,6 +331,7 @@ Resources:
       ManagedPolicyName: ClusterTemplateLaunchConstraintPolicy
       PolicyDocument:
         Version: '2012-10-17'
+        # Ref: https://docs.aws.amazon.com/servicecatalog/latest/adminguide/constraints-launch.html
         Statement:
         - Effect: Allow
           Resource: "*"
@@ -344,9 +345,14 @@ Resources:
           - "cloudformation:ValidateTemplate"
           - "cloudformation:UpdateStack"
           - "elasticmapreduce:RunJobFlow"
+          - "elasticmapreduce:DescribeCluster"
+          - "elasticmapreduce:TerminateJobFlows"
+          - "servicecatalog:*"
+          - "s3:GetObject"
         - Effect: Allow
           Resource:
           - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
+          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole
           Action:
           - "iam:passRole"
 
