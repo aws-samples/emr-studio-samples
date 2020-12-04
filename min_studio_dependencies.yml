@@ -129,10 +129,13 @@ Resources:
           - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
-          - "emr-containers:DescribeJobRun"
-          - "emr-containers:DescribeManagedEndpoint"
-          - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:DescribeVirtualCluster"
           - "emr-containers:ListVirtualClusters"
+          - "emr-containers:DescribeManagedEndpoint"
+          - "emr-containers:ListManagedEndpoints"
+          - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:DescribeJobRun"
+          - "emr-containers:ListJobRuns"
         - Sid: PassRolePermission
           Effect: Allow
           Resource: 
@@ -192,10 +195,13 @@ Resources:
           - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
-          - "emr-containers:DescribeJobRun"
-          - "emr-containers:DescribeManagedEndpoint"
-          - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:DescribeVirtualCluster"
           - "emr-containers:ListVirtualClusters"
+          - "emr-containers:DescribeManagedEndpoint"
+          - "emr-containers:ListManagedEndpoints"
+          - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:DescribeJobRun"
+          - "emr-containers:ListJobRuns"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
@@ -268,10 +274,13 @@ Resources:
           - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
-          - "emr-containers:DescribeJobRun"
-          - "emr-containers:DescribeManagedEndpoint"
-          - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:DescribeVirtualCluster"
           - "emr-containers:ListVirtualClusters"
+          - "emr-containers:DescribeManagedEndpoint"
+          - "emr-containers:ListManagedEndpoints"
+          - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:DescribeJobRun"
+          - "emr-containers:ListJobRuns"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
