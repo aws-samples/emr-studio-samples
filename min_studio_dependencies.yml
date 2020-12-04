@@ -131,6 +131,7 @@ Resources:
           - "secretsmanager:ListSecrets"
           - "emr-containers:DescribeJobRun"
           - "emr-containers:DescribeManagedEndpoint"
+          - "emr-containers:CreateAccessTokenForManagedEndpoint"
         - Sid: PassRolePermission
           Effect: Allow
           Resource: 
@@ -192,6 +193,7 @@ Resources:
           - "secretsmanager:ListSecrets"
           - "emr-containers:DescribeJobRun"
           - "emr-containers:DescribeManagedEndpoint"
+          - "emr-containers:CreateAccessTokenForManagedEndpoint"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
@@ -266,6 +268,7 @@ Resources:
           - "secretsmanager:ListSecrets"
           - "emr-containers:DescribeJobRun"
           - "emr-containers:DescribeManagedEndpoint"
+          - "emr-containers:CreateAccessTokenForManagedEndpoint"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
