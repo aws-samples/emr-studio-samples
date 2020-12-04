@@ -129,6 +129,8 @@ Resources:
           - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
+          - "emr-containers:DescribeJobRun"
+          - "emr-containers:DescribeManagedEndpoint"
         - Sid: PassRolePermission
           Effect: Allow
           Resource: 
@@ -188,6 +190,8 @@ Resources:
           - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
+          - "emr-containers:DescribeJobRun"
+          - "emr-containers:DescribeManagedEndpoint"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
@@ -260,6 +264,8 @@ Resources:
           - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
           - "secretsmanager:CreateSecret"  
           - "secretsmanager:ListSecrets"
+          - "emr-containers:DescribeJobRun"
+          - "emr-containers:DescribeManagedEndpoint"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
