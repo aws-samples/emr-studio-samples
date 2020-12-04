@@ -132,6 +132,7 @@ Resources:
           - "emr-containers:DescribeJobRun"
           - "emr-containers:DescribeManagedEndpoint"
           - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:ListVirtualClusters"
         - Sid: PassRolePermission
           Effect: Allow
           Resource: 
@@ -194,6 +195,7 @@ Resources:
           - "emr-containers:DescribeJobRun"
           - "emr-containers:DescribeManagedEndpoint"
           - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:ListVirtualClusters"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
@@ -269,6 +271,7 @@ Resources:
           - "emr-containers:DescribeJobRun"
           - "emr-containers:DescribeManagedEndpoint"
           - "emr-containers:CreateAccessTokenForManagedEndpoint"
+          - "emr-containers:ListVirtualClusters"
         - Sid: AllowIntermediateActions
           Effect: Allow
           Resource: "*"
