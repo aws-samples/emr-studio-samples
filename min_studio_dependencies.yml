@@ -72,7 +72,7 @@ Resources:
           - "s3:ListBucket"
           - "s3:DeleteObject"
         - Effect: Allow
-          Resource: "arn:aws:secretsmanager:::secret:*"
+          Resource: "arn:aws:secretsmanager:*:*:secret:*"
           Action:
           - "secretsmanager:GetSecretValue"
 
