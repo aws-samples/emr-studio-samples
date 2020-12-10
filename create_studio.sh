@@ -6,7 +6,6 @@
 # Creates a new Amazon EMR Studio and its associated AWS resource stack
 # through the following actions:
 #    - Prompts for AWS Region.
-#    - Checks that AWS SSO is enabled in the specified Region.
 #    - Prompts for the new EMR Studio name.
 #    - Provisions a Studio resource stack called emr-studio-dependencies
 #      using the full_studio_dependencies.yml AWS CloudFormation template 
