@@ -105,14 +105,6 @@
             ]
         },
         {
-            "Sid": "VerifySsoEnabledPermission",
-            "Effect": "Allow",
-            "Resource": "*",
-            "Action": [
-                "sso:ListInstances"
-            ]
-        },
-        {
             "Sid": "ServiceCatalogCreatePortfolioProductsPermission",
             "Effect": "Allow",
             "Resource": [
