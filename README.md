@@ -7,12 +7,13 @@ You can submit feedback and requests for changes by opening an issue in this rep
 
 ## Creating an EMR Studio using demo script
 
----
-**NOTE**
 
-Charges accrue for the AWS resources that the Studio creation script provisions, such as the Amazon VPC, subnets, and the AWS Service Catalog portfolio of AWS CloudFormation templates. 
 
----
+| :warning: WARNING          |
+|:---------------------------|
+| Charges accrue for the AWS resources that the Studio creation script provisions, such as the Amazon VPC, subnets, and the AWS Service Catalog portfolio of AWS CloudFormation templates.      |
+
+
 
 1. Set up the EMR Studio prerequisites described in the [Set Up an EMR Studio](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-set-up.html) section of the *Amazon EMR Management Guide*.
 2. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). The IAM principal should contain at least [Minimum Studio Admin permissions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-admin-role.html) and [AdditionalPermissionForSampleScript.json](https://github.com/aws-samples/emr-studio-samples/blob/main/AdditionalPermissionForSampleScript.json) in this repo
