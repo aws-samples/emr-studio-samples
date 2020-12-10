@@ -14,7 +14,7 @@ You can submit feedback and requests for changes by opening an issue in this rep
 4. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh) using one of the following commands:
    * Clone: ```git clone https://github.com/aws-samples/emr-studio-samples.git```
    * Download: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh --output create_studio.sh```
-5. In the terminal, navigate to the directory where you saved `create_studio.sh`. 
+5. In the terminal, navigate to the directory where you saved `create_studio.sh`
 6. Run: ```bash create_studio.sh```
 
 ## Creating an EMR Studio using your own S3 bucket, VPC and cluster templates
