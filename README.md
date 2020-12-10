@@ -1,6 +1,6 @@
 ## EMR Studio Samples
 
-This repository contains a script and AWS CloudFormation template samples for Amazon EMR Studio preview. For more
+This repository contains a script and AWS CloudFormation template samples for Amazon EMR Studio preview. You can create EMR Studios in AWS Organization [Member accounts](https://aws.amazon.com/organizations/faqs/) by using these samples. For more
 information about using EMR Studio, see [Use EMR Studio](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio.html) in the *Amazon EMR Management Guide*.
 
 You can submit feedback and requests for changes by opening an issue in this repo or by making proposed changes and submitting a pull request.
