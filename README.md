@@ -11,7 +11,7 @@ You can submit feedback and requests for changes by opening an issue in this rep
 
 | :warning: WARNING          |
 |:---------------------------|
-| Charges accrue for the AWS resources that the Studio creation script provisions, such as the Amazon VPC, subnets, and the AWS Service Catalog portfolio of AWS CloudFormation templates.      |
+| Charges accrue for the AWS resources that the demo script provisions, such as the Amazon VPC, subnets, and the AWS Service Catalog portfolio in the AWS CloudFormation stack.      |
 
 
 
