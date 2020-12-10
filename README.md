@@ -9,7 +9,7 @@ You can submit feedback and requests for changes by opening an issue in this rep
 
 
 1. Set up the EMR Studio prerequisites described in the [Set Up an EMR Studio](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-set-up.html) section of the *Amazon EMR Management Guide*.
-2. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+2. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). The IAM principal should contain at least [Minimum Studio Admin permissions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-admin-role.html) and [AdditionalPermissionForSampleScript.json](https://github.com/aws-samples/emr-studio-samples/blob/main/AdditionalPermissionForSampleScript.json) in this repo
 3. Make sure your AWS CLI version is equal or later than [awscli-1.18.184](https://github.com/aws/aws-cli/releases/tag/1.18.184)
 4. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_studio.sh) using one of the following commands:
    * Clone: ```git clone https://github.com/aws-samples/emr-studio-samples.git```
