@@ -54,7 +54,14 @@
                 "ec2:AuthorizeSecurityGroupEgress",
                 "ec2:DescribeAvailabilityZones",
                 "ec2:DescribeAccountAttributes"
-            ]
+            ],
+            "Condition": {
+                "ForAnyValue:StringEquals": {
+                    "aws:CalledVia": [
+                        "cloudformation.amazonaws.com"
+                    ]
+                }
+            }
         },
         {
             "Sid": "IamCreateRolePolicyPermission",
@@ -79,7 +86,14 @@
                 "iam:GetPolicy",
                 "iam:GetRole",
                 "iam:ListPolicyVersions"
-            ]
+            ],
+            "Condition": {
+                "ForAnyValue:StringEquals": {
+                    "aws:CalledVia": [
+                        "cloudformation.amazonaws.com"
+                    ]
+                }
+            }
         },
         {
             "Sid": "CloudformationPermission",
@@ -102,7 +116,14 @@
             "Action": [
                 "s3:CreateBucket",
                 "s3:DeleteBucket"
-            ]
+            ],
+            "Condition": {
+                "ForAnyValue:StringEquals": {
+                    "aws:CalledVia": [
+                        "cloudformation.amazonaws.com"
+                    ]
+                }
+            }
         },
         {
             "Sid": "ServiceCatalogCreatePortfolioProductsPermission",
@@ -131,7 +152,14 @@
                 "servicecatalog:DescribeProvisioningArtifact",
                 "servicecatalog:DeleteProduct",
                 "servicecatalog:DeletePortfolio"
-            ]
+            ],
+            "Condition": {
+                "ForAnyValue:StringEquals": {
+                    "aws:CalledVia": [
+                        "cloudformation.amazonaws.com"
+                    ]
+                }
+            }
         },
         {
             "Sid": "ServiceCatalogProductPassLaunchConstraintPermission",
