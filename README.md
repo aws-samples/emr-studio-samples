@@ -16,7 +16,7 @@ You can submit feedback and requests for changes by opening an issue in this rep
 
 
 1. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). The IAM principal should contain at least [Minimum Studio Admin permissions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-admin-role.html) and [AdditionalPermissionForDemoScript.json](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/AdditionalPermissionForDemoScript.json) in this repo
-2. Make sure your AWS CLI version is equal or later than [awscli-1.18.184](https://github.com/aws/aws-cli/releases/tag/1.18.184)
+2. Make sure your AWS CLI version is equal or later than [awscli-1.18.184](https://github.com/aws/aws-cli/releases/tag/1.18.184) or [awscli-2.1.4](https://github.com/aws/aws-cli/releases/tag/2.1.4)
 3. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_demo_studio_with_dependencies.sh) using one of the following commands:
    * Clone: ```git clone https://github.com/aws-samples/emr-studio-samples.git```
    * Download: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_demo_studio_with_dependencies.sh --output create_demo_studio_with_dependencies.sh```
