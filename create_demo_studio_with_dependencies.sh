@@ -24,7 +24,7 @@ echo "Enter the code for the AWS Region in which you want to create the Studio. 
 read region
 
 # Read Studio name
-echo "Enter a descriptive name for the Studio. For example, My first EMR Studio."
+echo "Enter a descriptive name for the Studio. For example, my-first-emr-studio."
 read studio_name
 
 # Retrieve full_studio_dependencies.yml
