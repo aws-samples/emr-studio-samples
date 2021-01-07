@@ -17,11 +17,12 @@ You can submit feedback and requests for changes by opening an issue in this rep
 
 1. Make sure you have your AWS credentials configured. For more information, see [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html). The IAM principal should contain at least [Minimum Studio Admin permissions](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio-admin-role.html) and [AdditionalPermissionForDemoScript.json](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/AdditionalPermissionForDemoScript.json) in this repo
 2. Make sure your AWS CLI version is equal or later than [awscli-1.18.184](https://github.com/aws/aws-cli/releases/tag/1.18.184) or [awscli-2.1.4](https://github.com/aws/aws-cli/releases/tag/2.1.4)
-3. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_demo_studio_with_dependencies.sh) using one of the following commands:
+3. The cluster creations inside EMR Studio use the default EMR resources, such as EMR_EC2_DefaultRole, EMR_DefaultRole and S3 bucket for logging EMR steps (e.g. s3://aws-logs123456789012-us-east-1/elasticmapreduce/). So make sure they are present. If your account has never created any EMR cluster before, these default resources will be missing. The easiest way to bootstrap them is to create an EMR cluster using console.
+4. Clone this repository, or download [create.sh](https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_demo_studio_with_dependencies.sh) using one of the following commands:
    * Clone: ```git clone https://github.com/aws-samples/emr-studio-samples.git```
    * Download: ```curl https://raw.githubusercontent.com/aws-samples/emr-studio-samples/main/create_demo_studio_with_dependencies.sh --output create_demo_studio_with_dependencies.sh```
-4. In the terminal, navigate to the directory where you saved `create_demo_studio_with_dependencies.sh`
-5. Run: ```bash create_demo_studio_with_dependencies.sh```
+5. In the terminal, navigate to the directory where you saved `create_demo_studio_with_dependencies.sh`
+6. Run: ```bash create_demo_studio_with_dependencies.sh```
 
 ## Creating an EMR Studio using your own S3 bucket, VPC and cluster templates
 If you prefer to use existing S3 Bucket, VPC, Private Subnets(with NAT) and Service catalog products, use ``min_studio_dependencies.yml`` to create a minimum resource stack for your Studio. This stack contains only one service role, one user role, three example session policies and two securigy groups, which are needed to create an EMR Studio. 
