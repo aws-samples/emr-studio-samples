@@ -208,6 +208,7 @@ Resources:
           Action:
           - "servicecatalog:DescribeProduct"
           - "servicecatalog:DescribeProductView"
+          - "servicecatalog:ListLaunchPaths"
           - "servicecatalog:DescribeProvisioningParameters"
           - "servicecatalog:ProvisionProduct"
           - "servicecatalog:SearchProducts"
@@ -286,6 +287,7 @@ Resources:
           Action:
           - "servicecatalog:DescribeProduct"
           - "servicecatalog:DescribeProductView"
+          - "servicecatalog:ListLaunchPaths"
           - "servicecatalog:DescribeProvisioningParameters"
           - "servicecatalog:ProvisionProduct"
           - "servicecatalog:SearchProducts"
