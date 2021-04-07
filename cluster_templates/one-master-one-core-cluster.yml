@@ -11,9 +11,15 @@ Parameters:
   EmrRelease:
     Type: "String"
     Default: "emr-6.2.0"
+    AllowedValues:
+    - "emr-6.2.0"
+    - "emr-5.32.0"
   ClusterInstanceType:
     Type: "String"
     Default: "m5.xlarge"
+    AllowedValues:
+    - "m5.xlarge"
+    - "m5.2xlarge"
 
 Resources:
   EmrCluster:
