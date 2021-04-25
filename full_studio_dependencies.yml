@@ -50,18 +50,10 @@ Resources:
           - "ec2:DescribeInstances"
           - "ec2:DescribeSubnets"
           - "ec2:DescribeVpcs"
+          - "ec2:CreateTags"
           - "elasticmapreduce:ListInstances"
           - "elasticmapreduce:DescribeCluster"
           - "elasticmapreduce:ListSteps"
-        - Effect: Allow
-          Resource: "arn:aws:ec2:*:*:network-interface/*"
-          Action:
-          - "ec2:CreateTags"
-          Condition:
-            ForAllValues:StringEquals:
-              aws:TagKeys:
-                - aws:elasticmapreduce:editor-id
-                - aws:elasticmapreduce:job-flow-id
         - Effect: Allow
           Resource: "arn:aws:s3:::*"
           Action:
