@@ -24,57 +24,142 @@ Resources:
       Description: "Service role for EMR Studio"
       RoleName: EMRStudio_Service_Role
 
+
   EMRStudioServiceRolePolicy:
-    Type: "AWS::IAM::ManagedPolicy"
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      Roles:
-      - Ref: "EMRStudioServiceRole"
       ManagedPolicyName: EMRStudioServiceRolePolicy
+      Roles:
+      - !Ref EMRStudioServiceRole
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Resource: "*"
-          Action:
-          - "ec2:AuthorizeSecurityGroupEgress"
-          - "ec2:AuthorizeSecurityGroupIngress"
-          - "ec2:CreateSecurityGroup"
-          - "ec2:DescribeSecurityGroups"
-          - "ec2:RevokeSecurityGroupEgress"
-          - "ec2:CreateNetworkInterface"
-          - "ec2:CreateNetworkInterfacePermission"
-          - "ec2:DeleteNetworkInterface"
-          - "ec2:DeleteNetworkInterfacePermission"
-          - "ec2:DescribeNetworkInterfaces"
-          - "ec2:ModifyNetworkInterfaceAttribute"
-          - "ec2:DescribeTags"
-          - "ec2:DescribeInstances"
-          - "ec2:DescribeSubnets"
-          - "ec2:DescribeVpcs"
-          - "elasticmapreduce:ListInstances"
-          - "elasticmapreduce:DescribeCluster"
-          - "elasticmapreduce:ListSteps"
-        - Effect: Allow
-          Resource: "arn:aws:ec2:*:*:network-interface/*"
-          Action:
-          - "ec2:CreateTags"
-          Condition:
-            ForAllValues:StringEquals:
-              aws:TagKeys:
-                - aws:elasticmapreduce:editor-id
-                - aws:elasticmapreduce:job-flow-id
-        - Effect: Allow
-          Resource: "arn:aws:s3:::*"
-          Action:
-          - "s3:PutObject"
-          - "s3:GetObject"
-          - "s3:GetEncryptionConfiguration"
-          - "s3:ListBucket"
-          - "s3:DeleteObject"
-        - Effect: Allow
-          Resource: "arn:aws:secretsmanager:*:*:secret:*"
-          Action:
-          - "secretsmanager:GetSecretValue"
+          - Sid: AllowEMRReadOnlyActions
+            Effect: Allow
+            Action:
+              - elasticmapreduce:ListInstances
+              - elasticmapreduce:DescribeCluster
+              - elasticmapreduce:ListSteps
+            Resource: '*'
+
+          - Sid: AllowEC2ENIActionsWithEMRTags
+            Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterfacePermission
+              - ec2:DeleteNetworkInterface
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:*:*:network-interface/*'
+            Condition:
+              StringEquals:
+                "aws:ResourceTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: AllowEC2ENIAttributeAction
+            Effect: Allow
+            Action:
+              - ec2:ModifyNetworkInterfaceAttribute
+            Resource:
+              - !Sub 'arn:${AWS::Partition}:ec2:*:*:instance/*'
+              - !Sub 'arn:${AWS::Partition}:ec2:*:*:network-interface/*'
+              - !Sub 'arn:${AWS::Partition}:ec2:*:*:security-group/*'
+
+          - Sid: AllowEC2SecurityGroupActionsWithEMRTags
+            Effect: Allow
+            Action:
+              - ec2:AuthorizeSecurityGroupEgress
+              - ec2:AuthorizeSecurityGroupIngress
+              - ec2:RevokeSecurityGroupEgress
+              - ec2:RevokeSecurityGroupIngress
+              - ec2:DeleteNetworkInterfacePermission
+            Resource: '*'
+            Condition:
+              StringEquals:
+                "aws:ResourceTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: AllowDefaultEC2SecurityGroupsCreationWithEMRTags
+            Effect: Allow
+            Action:
+              - ec2:CreateSecurityGroup
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:*:*:security-group/*'
+            Condition:
+              StringEquals:
+                "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: AllowDefaultEC2SecurityGroupsCreationInVPCWithEMRTags
+            Effect: Allow
+            Action:
+              - ec2:CreateSecurityGroup
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:*:*:vpc/*'
+            Condition:
+              StringEquals:
+                "aws:ResourceTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: AllowAddingEMRTagsDuringDefaultSecurityGroupCreation
+            Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:*:*:security-group/*'
+            Condition:
+              StringEquals:
+                "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+                "ec2:CreateAction": "CreateSecurityGroup"
+
+          - Sid: AllowEC2ENICreationWithEMRTags
+            Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterface
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:*:*:network-interface/*'
+            Condition:
+              StringEquals:
+                "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: AllowEC2ENICreationInSubnetAndSecurityGroupWithEMRTags
+            Effect: Allow
+            Action:
+              - ec2:CreateNetworkInterface
+            Resource:
+              - !Sub 'arn:${AWS::Partition}:ec2:*:*:subnet/*'
+              - !Sub 'arn:${AWS::Partition}:ec2:*:*:security-group/*'
+            Condition:
+              StringEquals:
+                "aws:ResourceTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: AllowAddingTagsDuringEC2ENICreation
+            Effect: Allow
+            Action:
+              - ec2:CreateTags
+            Resource: !Sub 'arn:${AWS::Partition}:ec2:*:*:network-interface/*'
+            Condition:
+              StringEquals:
+                "ec2:CreateAction": "CreateNetworkInterface"
+
+          - Sid: AllowEC2ReadOnlyActions
+            Effect: Allow
+            Action:
+              - ec2:DescribeSecurityGroups
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DescribeTags
+              - ec2:DescribeInstances
+              - ec2:DescribeSubnets
+              - ec2:DescribeVpcs
+            Resource: '*'
+
+          - Sid: AllowSecretsManagerReadOnlyActionsWithEMRTags
+            Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub 'arn:${AWS::Partition}:secretsmanager:*:*:secret:*'
+            Condition:
+              StringEquals:
+                "aws:ResourceTag/for-use-with-amazon-emr-managed-policies": "true"
+
+          - Sid: S3permission
+            Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:GetEncryptionConfiguration
+              - s3:ListBucket
+              - s3:DeleteObject
+            Resource: '*'
 
   EMRStudioUserRole:
     Type: AWS::IAM::Role
@@ -100,35 +185,38 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-        - Sid: AllowBasicActions
+        - Sid: AllowEMRBasicActions
           Effect: Allow
           Resource: "*"
           Action:
           - "elasticmapreduce:CreateEditor"
-          - "elasticmapreduce:DescribeEditor"  
-          - "elasticmapreduce:ListEditors"  
-          - "elasticmapreduce:StartEditor"  
-          - "elasticmapreduce:StopEditor"  
-          - "elasticmapreduce:DeleteEditor"  
-          - "elasticmapreduce:OpenEditorInConsole"  
-          - "elasticmapreduce:AttachEditor"  
-          - "elasticmapreduce:DetachEditor"  
-          - "elasticmapreduce:CreateRepository"  
-          - "elasticmapreduce:DescribeRepository"  
-          - "elasticmapreduce:DeleteRepository"  
-          - "elasticmapreduce:ListRepositories"  
-          - "elasticmapreduce:LinkRepository"  
-          - "elasticmapreduce:UnlinkRepository"  
-          - "elasticmapreduce:DescribeCluster"  
-          - "elasticmapreduce:ListInstanceGroups"  
-          - "elasticmapreduce:ListBootstrapActions"  
-          - "elasticmapreduce:ListClusters"  
-          - "elasticmapreduce:ListSteps"  
-          - "elasticmapreduce:CreatePersistentAppUI"  
-          - "elasticmapreduce:DescribePersistentAppUI"  
-          - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
-          - "secretsmanager:CreateSecret"  
-          - "secretsmanager:ListSecrets"
+          - "elasticmapreduce:DescribeEditor"
+          - "elasticmapreduce:ListEditors"
+          - "elasticmapreduce:StartEditor"
+          - "elasticmapreduce:StopEditor"
+          - "elasticmapreduce:DeleteEditor"
+          - "elasticmapreduce:OpenEditorInConsole"
+          - "elasticmapreduce:AttachEditor"
+          - "elasticmapreduce:DetachEditor"
+          - "elasticmapreduce:CreateRepository"
+          - "elasticmapreduce:DescribeRepository"
+          - "elasticmapreduce:DeleteRepository"
+          - "elasticmapreduce:ListRepositories"
+          - "elasticmapreduce:LinkRepository"
+          - "elasticmapreduce:UnlinkRepository"
+          - "elasticmapreduce:DescribeCluster"
+          - "elasticmapreduce:ListInstanceGroups"
+          - "elasticmapreduce:ListBootstrapActions"
+          - "elasticmapreduce:ListClusters"
+          - "elasticmapreduce:ListSteps"
+          - "elasticmapreduce:CreatePersistentAppUI"
+          - "elasticmapreduce:DescribePersistentAppUI"
+          - "elasticmapreduce:GetPersistentAppUIPresignedURL"
+          - "elasticmapreduce:GetOnClusterAppUIPresignedURL"
+        - Sid: AllowEMRContainersBasicActions
+          Effect: Allow
+          Resource: "*"
+          Action: 
           - "emr-containers:DescribeVirtualCluster"
           - "emr-containers:ListVirtualClusters"
           - "emr-containers:DescribeManagedEndpoint"
@@ -136,26 +224,44 @@ Resources:
           - "emr-containers:CreateAccessTokenForManagedEndpoint"
           - "emr-containers:DescribeJobRun"
           - "emr-containers:ListJobRuns"
-        - Sid: PassRolePermission
+        - Sid: AllowSecretManagerListSecrets
+          Effect: Allow
+          Resource: "*"
+          Action: "secretsmanager:ListSecrets"  
+        - Sid: AllowSecretCreationWithEMRTagsAndEMRStudioPrefix
+          Effect: Allow
+          Resource: 
+          - "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+          Action:
+          - "secretsmanager:CreateSecret"
+          Condition:
+            StringEquals:
+              "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+        - Sid: AllowAddingTagsOnSecretsWithEMRStudioPrefix
+          Effect: Allow
+          Resource: 
+          - "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+          Action:
+          - "secretsmanager:TagResource"
+        - Sid: AllowPassingServiceRoleForWorkspaceCreation
           Effect: Allow
           Resource: 
           - !GetAtt EMRStudioServiceRole.Arn
           Action: "iam:PassRole"  
-        - Sid: S3ListPermission
+        - Sid: AllowS3ListAndLocationPermissions
           Effect: Allow
           Resource: "arn:aws:s3:::*"
           Action:
           - "s3:ListAllMyBuckets"  
           - "s3:ListBucket"  
           - "s3:GetBucketLocation"
-        - Sid: S3GetObjectPermission
+        - Sid: AllowS3ReadOnlyAccessToLogs
           Effect: Allow
           Resource: 
-          - !Sub 'arn:aws:s3:::<my-bucket>/*'
           - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
           Action:
           - "s3:GetObject"  
-          
+
 
   EMRStudioIntermediateUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -166,35 +272,38 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-        - Sid: AllowBasicActions
+        - Sid: AllowEMRBasicActions
           Effect: Allow
           Resource: "*"
           Action:
           - "elasticmapreduce:CreateEditor"
-          - "elasticmapreduce:DescribeEditor"  
-          - "elasticmapreduce:ListEditors"  
-          - "elasticmapreduce:StartEditor"  
-          - "elasticmapreduce:StopEditor"  
-          - "elasticmapreduce:DeleteEditor"  
-          - "elasticmapreduce:OpenEditorInConsole"  
-          - "elasticmapreduce:AttachEditor"  
-          - "elasticmapreduce:DetachEditor"  
-          - "elasticmapreduce:CreateRepository"  
-          - "elasticmapreduce:DescribeRepository"  
-          - "elasticmapreduce:DeleteRepository"  
-          - "elasticmapreduce:ListRepositories"  
-          - "elasticmapreduce:LinkRepository"  
-          - "elasticmapreduce:UnlinkRepository"  
-          - "elasticmapreduce:DescribeCluster"  
-          - "elasticmapreduce:ListInstanceGroups"  
-          - "elasticmapreduce:ListBootstrapActions"  
-          - "elasticmapreduce:ListClusters"  
-          - "elasticmapreduce:ListSteps"  
-          - "elasticmapreduce:CreatePersistentAppUI"  
-          - "elasticmapreduce:DescribePersistentAppUI"  
-          - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
-          - "secretsmanager:CreateSecret"  
-          - "secretsmanager:ListSecrets"
+          - "elasticmapreduce:DescribeEditor"
+          - "elasticmapreduce:ListEditors"
+          - "elasticmapreduce:StartEditor"
+          - "elasticmapreduce:StopEditor"
+          - "elasticmapreduce:DeleteEditor"
+          - "elasticmapreduce:OpenEditorInConsole"
+          - "elasticmapreduce:AttachEditor"
+          - "elasticmapreduce:DetachEditor"
+          - "elasticmapreduce:CreateRepository"
+          - "elasticmapreduce:DescribeRepository"
+          - "elasticmapreduce:DeleteRepository"
+          - "elasticmapreduce:ListRepositories"
+          - "elasticmapreduce:LinkRepository"
+          - "elasticmapreduce:UnlinkRepository"
+          - "elasticmapreduce:DescribeCluster"
+          - "elasticmapreduce:ListInstanceGroups"
+          - "elasticmapreduce:ListBootstrapActions"
+          - "elasticmapreduce:ListClusters"
+          - "elasticmapreduce:ListSteps"
+          - "elasticmapreduce:CreatePersistentAppUI"
+          - "elasticmapreduce:DescribePersistentAppUI"
+          - "elasticmapreduce:GetPersistentAppUIPresignedURL"
+          - "elasticmapreduce:GetOnClusterAppUIPresignedURL"
+        - Sid: AllowEMRContainersBasicActions
+          Effect: Allow
+          Resource: "*"
+          Action: 
           - "emr-containers:DescribeVirtualCluster"
           - "emr-containers:ListVirtualClusters"
           - "emr-containers:DescribeManagedEndpoint"
@@ -202,7 +311,44 @@ Resources:
           - "emr-containers:CreateAccessTokenForManagedEndpoint"
           - "emr-containers:DescribeJobRun"
           - "emr-containers:ListJobRuns"
-        - Sid: AllowIntermediateActions
+        - Sid: AllowSecretManagerListSecrets
+          Effect: Allow
+          Resource: "*"
+          Action: "secretsmanager:ListSecrets"  
+        - Sid: AllowSecretCreationWithEMRTagsAndEMRStudioPrefix
+          Effect: Allow
+          Resource: 
+          - "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+          Action:
+          - "secretsmanager:CreateSecret"
+          Condition:
+            StringEquals:
+              "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+        - Sid: AllowAddingTagsOnSecretsWithEMRStudioPrefix
+          Effect: Allow
+          Resource: 
+          - "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+          Action:
+          - "secretsmanager:TagResource"
+        - Sid: AllowPassingServiceRoleForWorkspaceCreation
+          Effect: Allow
+          Resource: 
+          - !GetAtt EMRStudioServiceRole.Arn
+          Action: "iam:PassRole"  
+        - Sid: AllowS3ListAndLocationPermissions
+          Effect: Allow
+          Resource: "arn:aws:s3:::*"
+          Action:
+          - "s3:ListAllMyBuckets"  
+          - "s3:ListBucket"  
+          - "s3:GetBucketLocation"
+        - Sid: AllowS3ReadOnlyAccessToLogs
+          Effect: Allow
+          Resource: 
+          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
+          Action:
+          - "s3:GetObject"  
+        - Sid: AllowClusterTemplatesRelatedIntermediateActions
           Effect: Allow
           Resource: "*"
           Action:
@@ -215,25 +361,7 @@ Resources:
           - "servicecatalog:ListProvisioningArtifacts"
           - "servicecatalog:DescribeRecord"
           - "cloudformation:DescribeStackResources"
-        - Sid: PassRolePermission
-          Effect: Allow
-          Resource: 
-          - !GetAtt EMRStudioServiceRole.Arn
-          Action: "iam:PassRole"  
-        - Sid: S3ListPermission
-          Effect: Allow
-          Resource: "arn:aws:s3:::*"
-          Action:
-          - "s3:ListAllMyBuckets"  
-          - "s3:ListBucket"  
-          - "s3:GetBucketLocation"
-        - Sid: S3GetObjectPermission
-          Effect: Allow
-          Resource: 
-          - !Sub 'arn:aws:s3:::<my-bucket>/*'
-          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
-          Action:
-          - "s3:GetObject"
+
 
   EMRStudioAdvancedUserPolicy:
     Type: "AWS::IAM::ManagedPolicy"
@@ -244,35 +372,38 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-        - Sid: AllowBasicActions
+        - Sid: AllowEMRBasicActions
           Effect: Allow
           Resource: "*"
           Action:
           - "elasticmapreduce:CreateEditor"
-          - "elasticmapreduce:DescribeEditor"  
-          - "elasticmapreduce:ListEditors"  
-          - "elasticmapreduce:StartEditor"  
-          - "elasticmapreduce:StopEditor"  
-          - "elasticmapreduce:DeleteEditor"  
-          - "elasticmapreduce:OpenEditorInConsole"  
-          - "elasticmapreduce:AttachEditor"  
-          - "elasticmapreduce:DetachEditor"  
-          - "elasticmapreduce:CreateRepository"  
-          - "elasticmapreduce:DescribeRepository"  
-          - "elasticmapreduce:DeleteRepository"  
-          - "elasticmapreduce:ListRepositories"  
-          - "elasticmapreduce:LinkRepository"  
-          - "elasticmapreduce:UnlinkRepository"  
-          - "elasticmapreduce:DescribeCluster"  
-          - "elasticmapreduce:ListInstanceGroups"  
-          - "elasticmapreduce:ListBootstrapActions"  
-          - "elasticmapreduce:ListClusters"  
-          - "elasticmapreduce:ListSteps"  
-          - "elasticmapreduce:CreatePersistentAppUI"  
-          - "elasticmapreduce:DescribePersistentAppUI"  
-          - "elasticmapreduce:GetPersistentAppUIPresignedURL"  
-          - "secretsmanager:CreateSecret"  
-          - "secretsmanager:ListSecrets"
+          - "elasticmapreduce:DescribeEditor"
+          - "elasticmapreduce:ListEditors"
+          - "elasticmapreduce:StartEditor"
+          - "elasticmapreduce:StopEditor"
+          - "elasticmapreduce:DeleteEditor"
+          - "elasticmapreduce:OpenEditorInConsole"
+          - "elasticmapreduce:AttachEditor"
+          - "elasticmapreduce:DetachEditor"
+          - "elasticmapreduce:CreateRepository"
+          - "elasticmapreduce:DescribeRepository"
+          - "elasticmapreduce:DeleteRepository"
+          - "elasticmapreduce:ListRepositories"
+          - "elasticmapreduce:LinkRepository"
+          - "elasticmapreduce:UnlinkRepository"
+          - "elasticmapreduce:DescribeCluster"
+          - "elasticmapreduce:ListInstanceGroups"
+          - "elasticmapreduce:ListBootstrapActions"
+          - "elasticmapreduce:ListClusters"
+          - "elasticmapreduce:ListSteps"
+          - "elasticmapreduce:CreatePersistentAppUI"
+          - "elasticmapreduce:DescribePersistentAppUI"
+          - "elasticmapreduce:GetPersistentAppUIPresignedURL"
+          - "elasticmapreduce:GetOnClusterAppUIPresignedURL"
+        - Sid: AllowEMRContainersBasicActions
+          Effect: Allow
+          Resource: "*"
+          Action: 
           - "emr-containers:DescribeVirtualCluster"
           - "emr-containers:ListVirtualClusters"
           - "emr-containers:DescribeManagedEndpoint"
@@ -280,7 +411,46 @@ Resources:
           - "emr-containers:CreateAccessTokenForManagedEndpoint"
           - "emr-containers:DescribeJobRun"
           - "emr-containers:ListJobRuns"
-        - Sid: AllowIntermediateActions
+        - Sid: AllowSecretManagerListSecrets
+          Effect: Allow
+          Resource: "*"
+          Action: "secretsmanager:ListSecrets"  
+        - Sid: AllowSecretCreationWithEMRTagsAndEMRStudioPrefix
+          Effect: Allow
+          Resource: 
+          - "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+          Action:
+          - "secretsmanager:CreateSecret"
+          Condition:
+            StringEquals:
+              "aws:RequestTag/for-use-with-amazon-emr-managed-policies": "true"
+        - Sid: AllowAddingTagsOnSecretsWithEMRStudioPrefix
+          Effect: Allow
+          Resource: 
+          - "arn:aws:secretsmanager:*:*:secret:emr-studio-*"
+          Action:
+          - "secretsmanager:TagResource"
+        - Sid: AllowPassingServiceRoleForWorkspaceCreation
+          Effect: Allow
+          Resource: 
+          - !GetAtt EMRStudioServiceRole.Arn
+          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
+          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole
+          Action: "iam:PassRole"  
+        - Sid: AllowS3ListAndLocationPermissions
+          Effect: Allow
+          Resource: "arn:aws:s3:::*"
+          Action:
+          - "s3:ListAllMyBuckets"  
+          - "s3:ListBucket"  
+          - "s3:GetBucketLocation"
+        - Sid: AllowS3ReadOnlyAccessToLogs
+          Effect: Allow
+          Resource: 
+          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
+          Action:
+          - "s3:GetObject"  
+        - Sid: AllowClusterTemplatesRelatedIntermediateActions
           Effect: Allow
           Resource: "*"
           Action:
@@ -298,27 +468,7 @@ Resources:
           Resource: "*"
           Action:
           - "elasticmapreduce:RunJobFlow"
-        - Sid: PassRolePermission
-          Effect: Allow
-          Resource: 
-          - !GetAtt EMRStudioServiceRole.Arn
-          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
-          - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole
-          Action: "iam:PassRole"  
-        - Sid: S3ListPermission
-          Effect: Allow
-          Resource: "arn:aws:s3:::*"
-          Action:
-          - "s3:ListAllMyBuckets"  
-          - "s3:ListBucket"  
-          - "s3:GetBucketLocation"
-        - Sid: S3GetObjectPermission
-          Effect: Allow
-          Resource: 
-          - !Sub 'arn:aws:s3:::<my-bucket>/*'
-          - !Sub 'arn:aws:s3:::aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/*'
-          Action:
-          - "s3:GetObject"
+
 
 
   # Security Groups
@@ -336,6 +486,9 @@ Resources:
           FromPort: 443
           ToPort: 443
           CidrIp: "0.0.0.0/0"
+      Tags:
+      - Key: for-use-with-amazon-emr-managed-policies
+        Value: true
 
   EngineSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -345,6 +498,9 @@ Resources:
       GroupName: EngineSecurityGroup
       VpcId:
         Ref: VPC
+      Tags:
+      - Key: for-use-with-amazon-emr-managed-policies
+        Value: true
 
   EngineSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
