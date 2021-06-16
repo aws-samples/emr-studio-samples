@@ -12,7 +12,13 @@ Resources:
   #S3 Bucket
   EmrStudioStorageBucket:
     Type: AWS::S3::Bucket
-
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
 
   # IAM resources
   EMRStudioServiceRole:
