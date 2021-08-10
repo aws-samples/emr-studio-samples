@@ -582,6 +582,8 @@ Resources:
           - "elasticmapreduce:TerminateJobFlows"
           - "servicecatalog:*"
           - "s3:GetObject"
+          - "ssm:GetParameter"
+          - "ssm:GetParameters"
         - Effect: Allow
           Resource:
           - !Sub arn:${AWS::Partition}:iam::${AWS::AccountId}:role/EMR_DefaultRole
