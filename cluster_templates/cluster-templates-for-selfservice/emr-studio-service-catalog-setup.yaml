@@ -1,0 +1,99 @@
+# ######################################################################################################################
+# EMR Studio Service catalog portfolio setup
+# Version: 1.0
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# Creates portfolio and product self-serve the EMR templates within EMR Studio
+#
+# Considerations: The service catalog product names cannot have spaces otherwise workspace
+# deployment in EMR Studio will fail.
+# #######################################################################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  DeploymentName:
+    Type: "String"
+  EMRStudioAdminRole:
+    Type: "String"
+    Description: "ARN of the EMR Studio Admin role to access the service catalog portfolio"
+Resources:
+  ServiceCatalogPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      Description: "EMR Studio Sample Templates"
+      DisplayName: !Ref DeploymentName
+      ProviderName: !Sub ${DeploymentName}_Provider
+  ServiceCatalogLaunchConstrainRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${DeploymentName}_EMRTemplatesLaunchConstrainRole
+      Description: "Allow service catalog actions on EMR, Cloudformation and Service Actions"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: servicecatalog.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${DeploymentName}_EMRTemplatesLaunchConstrainRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            # TODO: Limit the permissions further, e.g. only the s3 bucket where cloudformation templates exist and the lambda macro.
+            # Note: Adding ec2 to give vpc permissions, adding lambda to give macro persmissions
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "elasticmapreduce:*"
+                  - "cloudformation:*"
+                  - "servicecatalog:*"
+                  - "s3:*"
+                  - "ec2:*"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "lambda:*"
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - "iam:PassRole"
+                Resource:
+                  - Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/EMR_DefaultRole"
+                  - Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole"
+  EMRTemplateProduct1:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties:
+      Description: "Sample EMR Template to be deployed in EMR Studio"
+      Distributor: !Sub ${DeploymentName}_Provider
+      Name: "EMRTemplate"
+      Owner: "aws-samples"
+      ProvisioningArtifactParameters:
+        - Info:
+            LoadTemplateFromURL: "https://s3.us-west-2.amazonaws.com/emrstudio.sample.templates/sample-cluster-template-for-service-catalog-DEV.yaml"
+          Name: "Template1v8"
+      SupportDescription: "Sample template for reference only"
+  EMRTemplateProductAssociation1:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: !Ref EMRTemplateProduct1
+  ServiceCatalogRoleConstrain1:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: "Use Cloudformation, EMR and ServiceCatalog"
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: !Ref EMRTemplateProduct1
+      RoleArn: !GetAtt ServiceCatalogLaunchConstrainRole.Arn
+  PortfolioPermissions:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      PrincipalARN: !Ref EMRStudioAdminRole
+      PrincipalType: IAM
+  #TODO - Remove before release, just used for testing as it is an isenguard role.
+  PortfolioPermissionsTesting:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      PrincipalARN:
+        Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/Admin"
+      PrincipalType: IAM

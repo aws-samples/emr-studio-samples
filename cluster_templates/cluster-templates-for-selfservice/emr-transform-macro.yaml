@@ -1,0 +1,19 @@
+# ######################################################################################################################
+# Sample Cloudformation Macro
+# Version: 1.0
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+# Creates a macro called emr-size-macro referencing the input lambda ARN
+#
+# #######################################################################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  emrsizemacro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Description: Lambda function to size emr node count based on team size
+      FunctionName: arn:aws:lambda:us-west-2:166588134205:function:emr-size-macro
+      Name: emr-size-macro
+
+
+
