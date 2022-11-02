@@ -3,18 +3,13 @@
 # Version: 1.0
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
-# Creates a AWS lambda that will be used by an AWS Cloudformation transform.
+# Creates an AWS lambda that will be used by an AWS Cloudformation transform.
 #
 # #######################################################################################################################
 Parameters:
   EnvName:
     Type: String
     Description: Name of an environment. 'dev', 'staging', 'prod' and any name.
-    AllowedPattern: ^.*[^0-9]$
-    ConstraintDescription: Must end with non-numeric character.
-  LambdaHandlerPath:
-    Type: String
-    Description: Path of a Lambda Handler.
     AllowedPattern: ^.*[^0-9]$
     ConstraintDescription: Must end with non-numeric character.
 Outputs:
@@ -57,34 +52,40 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSLambdaExecute
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
       Path: /
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName:
         Fn::Sub: macro-lambda-${EnvName}
-      Description: LambdaFunctioni of nodejs12.x.
-      Runtime: nodejs12.x
+      Description: Macro Lambda Function in Python 3.9.
+      Runtime: python3.9
       Code:
         ZipFile:
           "def lambda_handler(event, context):\n
+          \n
             fragment = event['fragment']\n
             event_type = event['params']['FleetType']\n
-            team_size = int(event['params']['InputSize'])\n
+            user_concurrency = int(event['params']['InputSize'])\n
+          \n
             print(fragment)\n
+          \n
             if event_type == 'task':\n
-              if fragment['Properties']['TargetOnDemandCapacity'] == 'custom::Target':\n
-                fragment['Properties']['TargetOnDemandCapacity'] = team_size\n
-              elif fragment['Properties']['TargetSpotCapacity'] == 'custom::Target':\n
-                fragment['Properties']['TargetSpotCapacity'] = team_size\n
+            \t if fragment['Properties']['TargetOnDemandCapacity'] == 'custom::Target':\n
+            \t\t fragment['Properties']['TargetOnDemandCapacity'] = user_concurrency\n
+            \t elif fragment['Properties']['TargetSpotCapacity'] == 'custom::Target':\n
+            \t\t fragment['Properties']['TargetSpotCapacity'] = user_concurrency\n
+            \n
             print(fragment)\n
+            \n
             return {\n
-            'requestId': event['requestId'],\n
-            'status': 'success',\n
-            'statusCode': 200,\n
-            'fragment': fragment\n
+              'requestId': event['requestId'],\n
+              'status': 'success',\n
+              'statusCode': 200,\n
+              'fragment': fragment\n
             }"
-      Handler: ${LambdaHandlerPath}
+      Handler: lambda_function.lambda_handler
       MemorySize: 128
       Timeout: 10
       Role:

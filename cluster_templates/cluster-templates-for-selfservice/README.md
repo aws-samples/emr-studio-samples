@@ -37,10 +37,19 @@ The following table list and describes the files in this repo:
 
 Follow these instructions to deploy the sample macro in your AWS cloudformation environment. 
 
-1. Create an Amazon S3 bucket.
-2. Upload the lambda code in an S3 bucket.
-3. Deploy your AWS Lambda function:
-4. Deploy your AWS Cloudformation macro:
+1. Deploy your AWS Lambda function using the sample emr-transform-lambda.yaml:
+
+```
+aws cloudformation create-stack \
+--stack-name "emr-transform-lambda" \
+--template-body file://emr-transform-lambda.yaml \
+--parameters ParameterKey=EnvName,ParameterValue=emr-transform-lambda \
+--capabilities CAPABILITY_NAMED_IAM \
+--region us-west-2
+
+```
+
+2. Deploy your AWS Cloudformation macro:
 
 ```
 aws cloudformation create-stack \
