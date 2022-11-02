@@ -27,9 +27,8 @@ The following table list and describes the files in this repo:
 | :-: |:---:   | :-: |
 | 1. | emr-transform-lambda.yaml | AWS Cloudformation template to deploy an AWS Lambda Function that will be reference by your Macro|
 | 2. | emr-transform-macro.yaml | AWS Cloudformation template to deploy the Transform macro |
-| 3. | app/emr-transform-macro.py | Sample AWS Lambda code that will used by the emr-transform-macro to replace placeholders in the template |
-| 4. | sample-cluster-template-for-service-catalog.yaml | Sample cluster template to deploy via EMR Studio|
-| 5. | emr-studio-service-catalog-setup.yaml | Template to deploy template in service catalog |
+| 3. | sample-cluster-template-for-service-catalog.yaml | Sample cluster template to deploy via EMR Studio|
+| 4. | emr-studio-service-catalog-setup.yaml | Template to deploy template in service catalog |
 
 ## Deployment Instructions
 
