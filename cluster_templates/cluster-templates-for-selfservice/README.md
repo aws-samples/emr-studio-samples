@@ -25,9 +25,8 @@ The following table list and describes the files in this repo:
 
 | # | File Name | Description  |
 | :-: |:---:   | :-: |
-| 1. | emr-transform-lambda.yaml | AWS Cloudformation template to deploy an AWS Lambda Function that will be reference by your Macro|
-| 2. | emr-transform-macro.yaml | AWS Cloudformation template to deploy the Transform macro |
-| 3. | sample-cluster-template-for-service-catalog.yaml | Sample cluster template to deploy via EMR Studio|
+| 1. | emr-transform-lambda.yaml | AWS Cloudformation template to deploy an AWS Lambda Function and AWS Cloudformation macro to reference in your transform|
+| 2. | sample-cluster-template-for-service-catalog.yaml | Sample cluster template to deploy via EMR Studio|
 | 4. | emr-studio-service-catalog-setup.yaml | Template to deploy template in service catalog |
 
 ## Deployment Instructions
@@ -36,7 +35,8 @@ The following table list and describes the files in this repo:
 
 Follow these instructions to deploy the sample macro in your AWS cloudformation environment. 
 
-1. Deploy your AWS Lambda function using the sample emr-transform-lambda.yaml:
+Deploy the "emr-transform-lambda.yaml" template in cloudformation. The stack will deploy an IAM Role, an AWS Lambda 
+function and initializes the "emr-size-macro" in AWS Cloudformation.
 
 ```
 aws cloudformation create-stack \
@@ -45,30 +45,18 @@ aws cloudformation create-stack \
 --parameters ParameterKey=EnvName,ParameterValue=emr-transform-lambda \
 --capabilities CAPABILITY_NAMED_IAM \
 --region us-west-2
-
 ```
 
-2. Deploy your AWS Cloudformation macro:
-
-```
-aws cloudformation create-stack \
---stack-name "emrstudio-emr-size-macro" \
---template-body file://emr-transform-macro.yaml \
---region us-west-2
-```
-
-### 2. Deploy your sample template in AWS Service Catalog
+### 2. Deploy the custom EMR template as a product in AWS Service Catalog
 
 1. Upload the emr cluster template into your Amazon S3 bucket
-2. Create a portfolio and product referencing your template.
+2. Create a portfolio and product referencing your template usign the "emr-studio-service-catalog-setup.yaml" template
+
+
 
 ### 3. Cleanup
 
-Delete cloudformation stacks:
-1. Remove service catalog stacks
-2. Remove macro stack
-3. Remove lambda stack
-4. Delete Amazon S3 buckets
+To clean-up remove the two AWS Cloudformation stacks deployed and the Amazon S3 bucket.
 
 
 ```

@@ -1,11 +1,12 @@
 # ######################################################################################################################
-# Sample Cloudformation Transform Lambda Function
+# Sample Cloudformation Transform and Lambda Function
 # Version: 1.0
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
-# Creates an AWS lambda that will be used by an AWS Cloudformation transform.
 #
-# #######################################################################################################################
+# Deploys an AWS Lambda function and initializes cloudformation macro to resolve the emr target capacity.
+#
+# ##############################################################################################################
 Parameters:
   EnvName:
     Type: String
@@ -96,4 +97,13 @@ Resources:
         Variables:
           ENV:
             Fn::Sub: ${EnvName}
-
+  EmrCapacityMacro:
+    Type: AWS::CloudFormation::Macro
+    DependsOn: LambdaFunction
+    Properties:
+      Description: Lambda function to size emr node count based on team size
+      FunctionName:
+        Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+      Name: emr-size-macro-dev
