@@ -61,12 +61,19 @@ To clean-up remove the two AWS Cloudformation stacks deployed and the Amazon S3 
 
 ```
 aws s3 cp ./sample-cluster-template-for-service-catalog.yaml s3://emrstudio.sample.templates/
-aws s3 cp ./emr-studio-network-setup.yaml s3://emrstudio.sample.templates/
-aws s3 cp ./emr-studio-iam-setup.yaml s3://emrstudio.sample.templates/
-aws s3 cp ./emr-studio-service-catalog-setup.yaml s3://emrstudio.sample.templates/
-aws s3 cp ./sample-cluster-template-for-service-catalog.yaml s3://emrstudio.sample.templates/
 
+emr-studio-service-catalog-setup.yaml
+
+
+aws cloudformation create-stack \
+--stack-name "emr-studo-service-catalog-setup" \
+--template-body file://emr-studio-service-catalog-setup.yaml \
+--parameters ParameterKey=DeploymentName,ParameterValue=emr-stuidio-service-catalog \
+--capabilities CAPABILITY_NAMED_IAM \
+--region us-west-2
+
+arn:aws:iam::${AWS::AccountId}:role/Admin"
 
 https://s3.us-west-2.amazonaws.com/emrstudio.sample.templates/sample-cluster-template-for-service-catalog.yaml
 ```
- 
+

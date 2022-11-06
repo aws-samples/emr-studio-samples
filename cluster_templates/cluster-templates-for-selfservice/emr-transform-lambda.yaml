@@ -86,7 +86,7 @@ Resources:
               'statusCode': 200,\n
               'fragment': fragment\n
             }"
-      Handler: lambda_function.lambda_handler
+      Handler: index.lambda_handler
       MemorySize: 128
       Timeout: 10
       Role:

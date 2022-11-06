@@ -3,9 +3,10 @@
 # Version: 1.0
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
+#
 # Creates portfolio and product self-serve the EMR templates within EMR Studio
 #
-# Considerations: The service catalog product names cannot have spaces otherwise workspace
+# Remember that service catalog product names cannot have spaces otherwise workspace
 # deployment in EMR Studio will fail.
 # #######################################################################################################################
 AWSTemplateFormatVersion: 2010-09-09
@@ -15,6 +16,7 @@ Parameters:
   EMRStudioAdminRole:
     Type: "String"
     Description: "ARN of the EMR Studio Admin role to access the service catalog portfolio"
+    Default: "arn:aws:iam::166588134205:role/Admin"
 Resources:
   ServiceCatalogPortfolio:
     Type: AWS::ServiceCatalog::Portfolio
@@ -68,8 +70,8 @@ Resources:
       Owner: "aws-samples"
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: "https://s3.us-west-2.amazonaws.com/emrstudio.sample.templates/sample-cluster-template-for-service-catalog-DEV.yaml"
-          Name: "Template1v8"
+            LoadTemplateFromURL: "https://s3.us-west-2.amazonaws.com/emrstudio.sample.templates/sample-cluster-template-for-service-catalog.yaml"
+          Name: "Template1v9"
       SupportDescription: "Sample template for reference only"
   EMRTemplateProductAssociation1:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
@@ -88,12 +90,4 @@ Resources:
     Properties:
       PortfolioId: !Ref ServiceCatalogPortfolio
       PrincipalARN: !Ref EMRStudioAdminRole
-      PrincipalType: IAM
-  #TODO - Remove before release, just used for testing as it is an isenguard role.
-  PortfolioPermissionsTesting:
-    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
-    Properties:
-      PortfolioId: !Ref ServiceCatalogPortfolio
-      PrincipalARN:
-        Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/Admin"
       PrincipalType: IAM

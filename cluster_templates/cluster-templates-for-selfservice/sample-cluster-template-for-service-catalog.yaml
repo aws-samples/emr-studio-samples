@@ -134,7 +134,7 @@ Resources:
               WeightedCapacity: 1
   EMRClusterTaskSpot:
     'Fn::Transform':
-      Name: emr-size-macro
+      Name: emr-size-macro-dev
       Parameters:
         FleetType: task
         InputSize: !Ref UserConcurrency
@@ -155,13 +155,18 @@ Resources:
           TimeoutDurationMinutes: 5
       InstanceTypeConfigs: !FindInMap [ InstanceTypes,!Ref MemoryProfile, taskfleet]
   EMRClusterTaskOnDemand:
+    'Fn::Transform':
+      Name: emr-size-macro-dev
+      Parameters:
+        FleetType: task
+        InputSize: !Ref UserConcurrency
     Type: AWS::EMR::InstanceFleetConfig
     Condition: UseOnDemand
     Properties:
       ClusterId: !Ref EMRCluster
       Name: cfnTask
       InstanceFleetType: TASK
-      TargetOnDemandCapacity: 6
+      TargetOnDemandCapacity: "custom::Target"
       TargetSpotCapacity: 0
       LaunchSpecifications:
         OnDemandSpecification:
