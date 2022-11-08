@@ -20,9 +20,6 @@ Outputs:
       Fn::GetAtt:
         - LambdaRole
         - Arn
-    Export:
-      Name:
-        Fn::Sub: LambdaRole
   LambdaFunctionName:
     Value:
       Ref: LambdaFunction
@@ -32,9 +29,6 @@ Outputs:
       Fn::GetAtt:
         - LambdaFunction
         - Arn
-    Export:
-      Name:
-        Fn::Sub: LambdaARN-${EnvName}
 Resources:
   LambdaRole:
     Type: AWS::IAM::Role
@@ -67,19 +61,27 @@ Resources:
           "def lambda_handler(event, context):\n
           \n
             fragment = event['fragment']\n
-            event_type = event['params']['FleetType']\n
-            user_concurrency = int(event['params']['InputSize'])\n
+            print(fragment)\n
+          \n
+            # input params \n
+            user_concurrency = int(event['templateParameterValues']['UserConcurrency'])\n
+            memory_profile = event['templateParameterValues']['MemoryProfile']\n
+            target = event['params']['Target']\n
+            executors_per_user = int(event['params']['ExecPerUser'])\n
+            executors_per_node = int(event['params']['ExecPerNode'][memory_profile])\n
+          \n
+            print('InputParams: target={}, user_concurrency={}, memory_profile={}, executors_per_user={},
+              executors_per_node={}'.format(target, user_concurrency, memory_profile, executors_per_user, executors_per_node))\n
+          \n
+            # calculate target capacity \n
+            target_capacity = round((user_concurrency*executors_per_user)/executors_per_node, 0)\n
+            print('TargetCapacity = {}'.format(target_capacity))\n
+          \n
+            if fragment['Properties'][target] == 'custom::Target':\n
+            \t fragment['Properties'][target] = target_capacity\n
           \n
             print(fragment)\n
           \n
-            if event_type == 'task':\n
-            \t if fragment['Properties']['TargetOnDemandCapacity'] == 'custom::Target':\n
-            \t\t fragment['Properties']['TargetOnDemandCapacity'] = user_concurrency\n
-            \t elif fragment['Properties']['TargetSpotCapacity'] == 'custom::Target':\n
-            \t\t fragment['Properties']['TargetSpotCapacity'] = user_concurrency\n
-            \n
-            print(fragment)\n
-            \n
             return {\n
               'requestId': event['requestId'],\n
               'status': 'success',\n
@@ -101,9 +103,9 @@ Resources:
     Type: AWS::CloudFormation::Macro
     DependsOn: LambdaFunction
     Properties:
-      Description: Lambda function to size emr node count based on team size
+      Description: Lambda function to size emr node count based on user concurrency, memory profile and executors per node
       FunctionName:
         Fn::GetAtt:
           - LambdaFunction
           - Arn
-      Name: emr-size-macro-dev
+      Name: emr-capacity-macro
