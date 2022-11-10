@@ -13,10 +13,13 @@ AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   DeploymentName:
     Type: "String"
+    Description: "A unique name for your stack deployment. Will be use to name your portfolio."
   EMRStudioAdminRole:
     Type: "String"
-    Description: "ARN of the EMR Studio Admin role to access the service catalog portfolio"
-    Default: "arn:aws:iam::166588134205:role/Admin"
+    Description: "ARN of the EMR Studio Admin role to access the service catalog portfolio."
+  TemplateS3Bucket:
+    Type: "String"
+    Description: "Name of the S3 bucket where you uploaded your Cloudformation template."
 Resources:
   ServiceCatalogPortfolio:
     Type: AWS::ServiceCatalog::Portfolio
@@ -27,7 +30,7 @@ Resources:
   ServiceCatalogLaunchConstrainRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${DeploymentName}_EMRTemplatesLaunchConstrainRole
+      RoleName: !Sub ${DeploymentName}_EMRLaunchConstrainRole
       Description: "Allow service catalog actions on EMR, Cloudformation and Service Actions"
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -37,53 +40,57 @@ Resources:
               Service: servicecatalog.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub ${DeploymentName}_EMRTemplatesLaunchConstrainRolePolicy
+        - PolicyName: !Sub ${DeploymentName}_EMRLaunchConstrainRolePolicy
           PolicyDocument:
             Version: 2012-10-17
-            # TODO: Limit the permissions further, e.g. only the s3 bucket where cloudformation templates exist and the lambda macro.
-            # Note: Adding ec2 to give vpc permissions, adding lambda to give macro persmissions
             Statement:
               - Effect: Allow
+                Sid: DeployEMR
                 Action:
                   - "elasticmapreduce:*"
                   - "cloudformation:*"
                   - "servicecatalog:*"
-                  - "s3:*"
                   - "ec2:*"
                 Resource: "*"
               - Effect: Allow
+                Sid: TemplateBucketReadOnly
+                Action:
+                  - "s3:Get*"
+                Resource: !Sub 'arn:aws:s3:::${TemplateS3Bucket}/*'
+              - Effect: Allow
+                Sid: MacroLambda
                 Action:
                   - "lambda:*"
-                Resource: "*"
+                Resource: !ImportValue emr-capacity-macro-lambda
               - Effect: Allow
                 Action:
                   - "iam:PassRole"
                 Resource:
                   - Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/EMR_DefaultRole"
                   - Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole"
-  EMRTemplateProduct1:
+  EMRTemplateProduct:
     Type: AWS::ServiceCatalog::CloudFormationProduct
     Properties:
       Description: "Sample EMR Template to be deployed in EMR Studio"
       Distributor: !Sub ${DeploymentName}_Provider
-      Name: "EMRTemplate"
+      Name: !Sub ${DeploymentName}_EMRProduct
       Owner: "aws-samples"
       ProvisioningArtifactParameters:
         - Info:
-            LoadTemplateFromURL: "https://s3.us-west-2.amazonaws.com/emrstudio.sample.templates/sample-cluster-template-for-service-catalog.yaml"
-          Name: "Template1v9"
+            LoadTemplateFromURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplateS3Bucket}/sample-cluster-template-for-service-catalog.yaml"
+          Name: "TemplateV10"
       SupportDescription: "Sample template for reference only"
   EMRTemplateProductAssociation1:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties:
       PortfolioId: !Ref ServiceCatalogPortfolio
-      ProductId: !Ref EMRTemplateProduct1
+      ProductId: !Ref EMRTemplateProduct
   ServiceCatalogRoleConstrain1:
     Type: AWS::ServiceCatalog::LaunchRoleConstraint
     Properties:
       Description: "Use Cloudformation, EMR and ServiceCatalog"
       PortfolioId: !Ref ServiceCatalogPortfolio
-      ProductId: !Ref EMRTemplateProduct1
+      ProductId: !Ref EMRTemplateProduct
       RoleArn: !GetAtt ServiceCatalogLaunchConstrainRole.Arn
   PortfolioPermissions:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation

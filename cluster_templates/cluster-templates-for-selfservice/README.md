@@ -49,9 +49,20 @@ aws cloudformation create-stack \
 
 ### 2. Deploy the custom EMR template as a product in AWS Service Catalog
 
-1. Upload the emr cluster template into your Amazon S3 bucket
-2. Create a portfolio and product referencing your template usign the "emr-studio-service-catalog-setup.yaml" template
+1. Create an S3 bucket.
+2. Upload the emr cluster template into your Amazon S3 bucket
+3. Create a portfolio and product referencing your template using the "emr-studio-service-catalog-setup.yaml" template
 
+```
+aws cloudformation create-stack \
+--stack-name "emr-service-catalog-product" \
+--template-body file://emr-studio-service-catalog-setup.yaml \
+--parameters ParameterKey=DeploymentName,ParameterValue=EMRStudioSampleProduct \
+ParameterKey=EMRStudioAdminRole,ParameterValue=arn:aws:iam::166588134205:role/Admin \
+ParameterKey=TemplateS3Bucket,ParameterValue=emrstudio.sample.templates \
+--capabilities CAPABILITY_NAMED_IAM \
+--region us-west-2
+```
 
 
 ### 3. Cleanup
@@ -61,8 +72,6 @@ To clean-up remove the two AWS Cloudformation stacks deployed and the Amazon S3 
 
 ```
 aws s3 cp ./sample-cluster-template-for-service-catalog.yaml s3://emrstudio.sample.templates/
-
-emr-studio-service-catalog-setup.yaml
 
 
 aws cloudformation create-stack \
@@ -77,3 +86,5 @@ arn:aws:iam::${AWS::AccountId}:role/Admin"
 https://s3.us-west-2.amazonaws.com/emrstudio.sample.templates/sample-cluster-template-for-service-catalog.yaml
 ```
 
+
+Default: "arn:aws:iam::166588134205:role/Admin"

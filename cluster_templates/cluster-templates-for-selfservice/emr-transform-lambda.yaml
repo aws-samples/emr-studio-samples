@@ -29,6 +29,8 @@ Outputs:
       Fn::GetAtt:
         - LambdaFunction
         - Arn
+    Export:
+      Name: emr-capacity-macro-lambda
 Resources:
   LambdaRole:
     Type: AWS::IAM::Role
@@ -109,3 +111,4 @@ Resources:
           - LambdaFunction
           - Arn
       Name: emr-capacity-macro
+
