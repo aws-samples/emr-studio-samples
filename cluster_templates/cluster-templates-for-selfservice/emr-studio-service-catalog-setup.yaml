@@ -16,7 +16,7 @@ Parameters:
     Description: "A unique name for your stack deployment. Will be use to name your portfolio."
   EMRStudioAdminRole:
     Type: "String"
-    Description: "ARN of the EMR Studio Admin role to access the service catalog portfolio."
+    Description: "ARN of the EMR Studio Admin role that will be allowed to access the service catalog portfolio."
   TemplateS3Bucket:
     Type: "String"
     Description: "Name of the S3 bucket where you uploaded your Cloudformation template."
@@ -51,12 +51,8 @@ Resources:
                   - "cloudformation:*"
                   - "servicecatalog:*"
                   - "ec2:*"
-                Resource: "*"
-              - Effect: Allow
-                Sid: TemplateBucketReadOnly
-                Action:
                   - "s3:Get*"
-                Resource: !Sub 'arn:aws:s3:::${TemplateS3Bucket}/*'
+                Resource: "*"
               - Effect: Allow
                 Sid: MacroLambda
                 Action:
@@ -78,7 +74,7 @@ Resources:
       ProvisioningArtifactParameters:
         - Info:
             LoadTemplateFromURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplateS3Bucket}/sample-cluster-template-for-service-catalog.yaml"
-          Name: "TemplateV10"
+          Name: "Template002"
       SupportDescription: "Sample template for reference only"
   EMRTemplateProductAssociation1:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation

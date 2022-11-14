@@ -6,8 +6,10 @@
 #
 # EMR Cluster Template leveraging  predefined VPC and subnets from EMR Studio
 # - Mappings to resolve instance fleet instance types
-# - Condition to use instancefleet with only spot or with only ondemand instances
+# - Condition to use instance fleet with only spot or with only on-demand instances
 # - Transform to resolve target capacity.
+# - Assumes VPC, Private Subnet (EMRPrivateSubnet) and security group (EMRClusterSecurityGroup) exist and values are
+#   available to import by cloudformation !import function.
 # ######################################################################################################################
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
@@ -138,10 +140,7 @@ Resources:
       Parameters:
         Target: TargetSpotCapacity
         ExecPerUser: 10
-        ExecPerNode:
-          small: 3
-          medium: 7
-          large: 7
+        ExecPerNode: '{"small": 3, "medium": 7, "large": 7}'
     Type: AWS::EMR::InstanceFleetConfig
     Condition: UseSpot
     Properties:
@@ -164,10 +163,7 @@ Resources:
       Parameters:
         Target: TargetOnDemandCapacity
         ExecPerUser: 10
-        ExecPerNode:
-          small: 3
-          medium: 7
-          large: 7
+        ExecPerNode: '{"small": 3, "medium": 7, "large": 7}'
     Type: AWS::EMR::InstanceFleetConfig
     Condition: UseOnDemand
     Properties:

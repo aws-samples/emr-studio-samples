@@ -60,36 +60,38 @@ Resources:
       Runtime: python3.9
       Code:
         ZipFile:
-          "def lambda_handler(event, context):\n
+          "import json \ndef lambda_handler(event, context):\n
           \n
-            fragment = event['fragment']\n
-            print(fragment)\n
+          \t  print(event)\n
+          \t  fragment = event['fragment']\n
+          \t  print(fragment)\n
           \n
-            # input params \n
-            user_concurrency = int(event['templateParameterValues']['UserConcurrency'])\n
-            memory_profile = event['templateParameterValues']['MemoryProfile']\n
-            target = event['params']['Target']\n
-            executors_per_user = int(event['params']['ExecPerUser'])\n
-            executors_per_node = int(event['params']['ExecPerNode'][memory_profile])\n
+          \t # input params \n
+          \t  user_concurrency = int(event['templateParameterValues']['UserConcurrency'])\n
+          \t  memory_profile = event['templateParameterValues']['MemoryProfile']\n
+          \t  target = event['params']['Target']\n
+          \t  executors_per_user = int(event['params']['ExecPerUser'])\n
+          \t  executors_per_node_values = json.loads(event['params']['ExecPerNode'])\n
+          \t  executors_per_node = int(executors_per_node_values[memory_profile])\n
           \n
-            print('InputParams: target={}, user_concurrency={}, memory_profile={}, executors_per_user={},
-              executors_per_node={}'.format(target, user_concurrency, memory_profile, executors_per_user, executors_per_node))\n
+          \t  print('InputParams: target={}, user_concurrency={}, memory_profile={}, executors_per_user={},
+          \t    executors_per_node={}'.format(target, user_concurrency, memory_profile, executors_per_user, executors_per_node))\n
           \n
-            # calculate target capacity \n
-            target_capacity = round((user_concurrency*executors_per_user)/executors_per_node, 0)\n
-            print('TargetCapacity = {}'.format(target_capacity))\n
+          \t  # calculate target capacity \n
+          \t  target_capacity = round((user_concurrency*executors_per_user)/executors_per_node, 0)\n
+          \t  print('TargetCapacity = {}'.format(target_capacity))\n
           \n
-            if fragment['Properties'][target] == 'custom::Target':\n
-            \t fragment['Properties'][target] = target_capacity\n
+          \t  if fragment['Properties'][target] == 'custom::Target':\n
+          \t  \t fragment['Properties'][target] = target_capacity\n
           \n
-            print(fragment)\n
+          \t  print(fragment)\n
           \n
-            return {\n
-              'requestId': event['requestId'],\n
-              'status': 'success',\n
-              'statusCode': 200,\n
-              'fragment': fragment\n
-            }"
+          \t  return {\n
+          \t    'requestId': event['requestId'],\n
+          \t    'status': 'success',\n
+          \t    'statusCode': 200,\n
+          \t    'fragment': fragment\n
+          \t  }"
       Handler: index.lambda_handler
       MemorySize: 128
       Timeout: 10
