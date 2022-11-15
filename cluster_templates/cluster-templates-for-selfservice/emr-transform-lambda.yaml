@@ -78,7 +78,7 @@ Resources:
           \t    executors_per_node={}'.format(target, user_concurrency, memory_profile, executors_per_user, executors_per_node))\n
           \n
           \t  # calculate target capacity \n
-          \t  target_capacity = round((user_concurrency*executors_per_user)/executors_per_node, 0)\n
+          \t  target_capacity = int(round((user_concurrency*executors_per_user)/executors_per_node, 0))\n
           \t  print('TargetCapacity = {}'.format(target_capacity))\n
           \n
           \t  if fragment['Properties'][target] == 'custom::Target':\n
