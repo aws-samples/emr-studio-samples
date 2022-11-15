@@ -4,12 +4,16 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 #
+# Use as reference and validate the target output produced by the transform produces the desired number of nodes. Read
+# all notes below before deploying.
+#
 # EMR Cluster Template leveraging  predefined VPC and subnets from EMR Studio
 # - Mappings to resolve instance fleet instance types
 # - Condition to use instance fleet with only spot or with only on-demand instances
 # - Transform to resolve target capacity.
 # - Assumes VPC, Private Subnet (EMRPrivateSubnet) and security group (EMRClusterSecurityGroup) exist and values are
 #   available to import by cloudformation !import function.
+# - Assumes pem key has been created.
 # ######################################################################################################################
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
@@ -111,9 +115,10 @@ Resources:
       Instances:
         TerminationProtected: false
         # Next 4 network parameters import CloudFormation exported values. Assumes the network is already deployed using
-        # a cloudformation stack with exported values. This can also be parameterized, however it would require to expose
-        # some infrastucture complexity to end users and will increase the dependency to cloud operations teams.
-        Ec2KeyName: 'key_generic.pem'
+        # an AWS cloudformation stack with exported values. The pem key also should be replaced witha valid pem key in your
+        # aws account. These values can also be parameterized in the template, however it would require to expose
+        # infrastucture complexity to end users and will increase the dependency to cloud operations teams.
+        Ec2KeyName: <your_pem_key>
         Ec2SubnetId: !ImportValue EMRPrivateSubnet
         # EMR Cluster security group
         EmrManagedMasterSecurityGroup: !ImportValue EMRClusterSecurityGroup
