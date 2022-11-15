@@ -1,0 +1,116 @@
+# ######################################################################################################################
+# Sample Cloudformation Transform and Lambda Function
+# Version: 1.0
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Deploys an AWS Lambda function and initializes cloudformation macro to resolve the emr target capacity.
+#
+# ##############################################################################################################
+Parameters:
+  EnvName:
+    Type: String
+    Description: Name of an environment. 'dev', 'staging', 'prod' and any name.
+    AllowedPattern: ^.*[^0-9]$
+    ConstraintDescription: Must end with non-numeric character.
+Outputs:
+  LambdaRoleARN:
+    Description: Role for Lambda execution.
+    Value:
+      Fn::GetAtt:
+        - LambdaRole
+        - Arn
+  LambdaFunctionName:
+    Value:
+      Ref: LambdaFunction
+  LambdaFunctionARN:
+    Description: Lambda function ARN.
+    Value:
+      Fn::GetAtt:
+        - LambdaFunction
+        - Arn
+    Export:
+      Name: emr-capacity-macro-lambda
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: lambda-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+      Path: /
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: macro-lambda-${EnvName}
+      Description: Macro Lambda Function in Python 3.9.
+      Runtime: python3.9
+      Code:
+        ZipFile:
+          "import json \ndef lambda_handler(event, context):\n
+          \n
+          \t  print(event)\n
+          \t  fragment = event['fragment']\n
+          \t  print(fragment)\n
+          \n
+          \t # input params \n
+          \t  user_concurrency = int(event['templateParameterValues']['UserConcurrency'])\n
+          \t  memory_profile = event['templateParameterValues']['MemoryProfile']\n
+          \t  target = event['params']['Target']\n
+          \t  executors_per_user = int(event['params']['ExecPerUser'])\n
+          \t  executors_per_node_values = json.loads(event['params']['ExecPerNode'])\n
+          \t  executors_per_node = int(executors_per_node_values[memory_profile])\n
+          \n
+          \t  print('InputParams: target={}, user_concurrency={}, memory_profile={}, executors_per_user={},
+          \t    executors_per_node={}'.format(target, user_concurrency, memory_profile, executors_per_user, executors_per_node))\n
+          \n
+          \t  # calculate target capacity \n
+          \t  target_capacity = int(round((user_concurrency*executors_per_user)/executors_per_node, 0))\n
+          \t  print('TargetCapacity = {}'.format(target_capacity))\n
+          \n
+          \t  if fragment['Properties'][target] == 'custom::Target':\n
+          \t  \t fragment['Properties'][target] = target_capacity\n
+          \n
+          \t  print(fragment)\n
+          \n
+          \t  return {\n
+          \t    'requestId': event['requestId'],\n
+          \t    'status': 'success',\n
+          \t    'statusCode': 200,\n
+          \t    'fragment': fragment\n
+          \t  }"
+      Handler: index.lambda_handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaRole
+          - Arn
+      Environment:
+        Variables:
+          ENV:
+            Fn::Sub: ${EnvName}
+  EmrCapacityMacro:
+    Type: AWS::CloudFormation::Macro
+    DependsOn: LambdaFunction
+    Properties:
+      Description: Lambda function to size emr node count based on user concurrency, memory profile and executors per node
+      FunctionName:
+        Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+      Name: emr-capacity-macro
+

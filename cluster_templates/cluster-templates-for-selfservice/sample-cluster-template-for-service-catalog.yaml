@@ -1,0 +1,191 @@
+# ######################################################################################################################
+# Sample Cluster Template 1 for Service Catalog
+# Version: 1.0
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Use as reference and validate the target output produced by the transform produces the desired number of nodes. Read
+# all notes below before deploying.
+#
+# EMR Cluster Template leveraging  predefined VPC and subnets from EMR Studio
+# - Mappings to resolve instance fleet instance types
+# - Condition to use instance fleet with only spot or with only on-demand instances
+# - Transform to resolve target capacity.
+# - Assumes VPC, Private Subnet (EMRPrivateSubnet) and security group (EMRClusterSecurityGroup) exist and values are
+#   available to import by cloudformation !import function.
+# - Assumes pem key has been created.
+# ######################################################################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ClusterName:
+    Type: "String"
+    Default: "Example_EMR_Cluster"
+  MemoryProfile:
+    Description: "What is the memory profile you expect in your workload."
+    Type: "String"
+    Default: "small"
+    AllowedValues: ['small', 'medium', 'large']
+  Optimization:
+    Description: "Do you want to optimize for cost or reliability? Use cost if you need a predictable job SLA."
+    Type: "String"
+    Default: "cost"
+    AllowedValues: [ 'cost', 'reliability' ]
+  UserConcurrency:
+    Description: "How many users you expect to run jobs simultaneously"
+    Type: "Number"
+    Default: "5"
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Engine ID"
+        Parameters:
+          - ClusterName
+      - Label:
+          default: "Analytics Engine Sizing"
+        Parameters:
+          - UserConcurrency
+          - MemoryProfile
+          - Optimization
+    ParameterLabels:
+      MemoryProfile:
+        default: "Memory Profile"
+Mappings:
+  EMRRelease:
+    current:
+      EMR6: "emr-6.2.0"
+      EMR5: "emr-5.32.0"
+  InstanceTypes:
+    small:
+      master: "m5.xlarge"
+      core: "m5.xlarge"
+      taskfleet:
+        - InstanceType: m5.2xlarge
+          WeightedCapacity: 1
+        - InstanceType: m5.4xlarge
+          WeightedCapacity: 2
+        - InstanceType: m5.8xlarge
+          WeightedCapacity: 3
+    medium:
+      master: "m5.xlarge"
+      core: "r5.2xlarge"
+      taskfleet:
+        - InstanceType: r5.2xlarge
+          WeightedCapacity: 1
+        - InstanceType: r5.4xlarge
+          WeightedCapacity: 2
+        - InstanceType: r5.8xlarge
+          WeightedCapacity: 3
+    large:
+      master: "m5.xlarge"
+      core: "r5.4xlarge"
+      taskfleet:
+        - InstanceType: r5.2xlarge
+          WeightedCapacity: 1
+        - InstanceType: r5.4xlarge
+          WeightedCapacity: 2
+        - InstanceType: r5.8xlarge
+          WeightedCapacity: 3
+Conditions:
+  UseSpot: !Equals
+    - !Ref Optimization
+    - cost
+  UseOnDemand:
+    !Equals
+    - !Ref Optimization
+    - reliability
+Resources:
+  #EMR Cluster
+  EMRCluster:
+    Type: AWS::EMR::Cluster
+    Properties:
+      Name: !Ref ClusterName
+      Applications:
+        - Name: Spark
+        - Name: Livy
+        - Name: JupyterEnterpriseGateway
+        - Name: Hive
+      EbsRootVolumeSize: '10'
+      JobFlowRole: EMR_EC2_DefaultRole
+      ServiceRole: EMR_DefaultRole
+      ReleaseLabel: !FindInMap [EMRRelease, 'current', 'EMR6']
+      VisibleToAllUsers: true
+      LogUri:
+        Fn::Sub: 's3://aws-logs-${AWS::AccountId}-${AWS::Region}/elasticmapreduce/'
+      Instances:
+        TerminationProtected: false
+        # Next 4 network parameters import CloudFormation exported values. Assumes the network is already deployed using
+        # an AWS cloudformation stack with exported values. The pem key also should be replaced witha valid pem key in your
+        # aws account. These values can also be parameterized in the template, however it would require to expose
+        # infrastucture complexity to end users and will increase the dependency to cloud operations teams.
+        Ec2KeyName: <your_pem_key>
+        Ec2SubnetId: !ImportValue EMRPrivateSubnet
+        # EMR Cluster security group
+        EmrManagedMasterSecurityGroup: !ImportValue EMRClusterSecurityGroup
+        EmrManagedSlaveSecurityGroup: !ImportValue EMRClusterSecurityGroup
+        # EMR Workspace security group
+        ServiceAccessSecurityGroup: !ImportValue EMRServiceAccountSecurityGroup
+        MasterInstanceFleet:
+          Name: cfnMaster
+          TargetOnDemandCapacity: 1
+          TargetSpotCapacity: 0
+          InstanceTypeConfigs:
+            - InstanceType: !FindInMap [InstanceTypes, !Ref MemoryProfile, master]
+              WeightedCapacity: 1
+        CoreInstanceFleet:
+          Name: cfnCore
+          TargetOnDemandCapacity: 1
+          TargetSpotCapacity: 0
+          InstanceTypeConfigs:
+            - InstanceType: !FindInMap [InstanceTypes, !Ref MemoryProfile, core]
+              WeightedCapacity: 1
+  EMRClusterTaskSpot:
+    'Fn::Transform':
+      Name: emr-capacity-macro
+      Parameters:
+        Target: TargetSpotCapacity
+        ExecPerUser: 10
+        ExecPerNode: '{"small": 3, "medium": 7, "large": 7}'
+    Type: AWS::EMR::InstanceFleetConfig
+    Condition: UseSpot
+    Properties:
+      ClusterId: !Ref EMRCluster
+      Name: cfnTask
+      InstanceFleetType: TASK
+      TargetOnDemandCapacity: 0
+      TargetSpotCapacity: "custom::Target"
+      LaunchSpecifications:
+        OnDemandSpecification:
+          AllocationStrategy: lowest-price
+        SpotSpecification:
+          AllocationStrategy: capacity-optimized
+          TimeoutAction: SWITCH_TO_ON_DEMAND
+          TimeoutDurationMinutes: 5
+      InstanceTypeConfigs: !FindInMap [ InstanceTypes,!Ref MemoryProfile, taskfleet]
+  EMRClusterTaskOnDemand:
+    'Fn::Transform':
+      Name: emr-capacity-macro
+      Parameters:
+        Target: TargetOnDemandCapacity
+        ExecPerUser: 10
+        ExecPerNode: '{"small": 3, "medium": 7, "large": 7}'
+    Type: AWS::EMR::InstanceFleetConfig
+    Condition: UseOnDemand
+    Properties:
+      ClusterId: !Ref EMRCluster
+      Name: cfnTask
+      InstanceFleetType: TASK
+      TargetOnDemandCapacity: "custom::Target"
+      TargetSpotCapacity: 0
+      LaunchSpecifications:
+        OnDemandSpecification:
+          AllocationStrategy: lowest-price
+      InstanceTypeConfigs: !FindInMap [ InstanceTypes, !Ref MemoryProfile, taskfleet ]
+Outputs:
+  ClusterId:
+    Value: !Ref EMRCluster
+    Description: The ID of the EMR Cluster
+  MasterNodeHadoopURL:
+    Description: EMR Resource Manager",
+    Value:
+      Fn::Sub: 'http://${EMRCluster.MasterPublicDNS}:8088'

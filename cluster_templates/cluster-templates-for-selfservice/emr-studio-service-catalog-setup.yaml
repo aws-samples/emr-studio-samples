@@ -1,0 +1,96 @@
+# ######################################################################################################################
+# EMR Studio Service catalog portfolio setup
+# Version: 1.0
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Creates portfolio and product self-serve the EMR templates within EMR Studio
+#
+# Remember that service catalog product names cannot have spaces otherwise workspace
+# deployment in EMR Studio will fail.
+# #######################################################################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  DeploymentName:
+    Type: "String"
+    Description: "A unique name for your stack deployment. Will be use to name your portfolio."
+  EMRStudioAdminRole:
+    Type: "String"
+    Description: "ARN of the EMR Studio Admin role that will be allowed to access the service catalog portfolio."
+  TemplateS3Bucket:
+    Type: "String"
+    Description: "Name of the S3 bucket where you uploaded your Cloudformation template."
+Resources:
+  ServiceCatalogPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      Description: "EMR Studio Sample Templates"
+      DisplayName: !Ref DeploymentName
+      ProviderName: !Sub ${DeploymentName}_Provider
+  ServiceCatalogLaunchConstrainRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${DeploymentName}_EMRLaunchConstrainRole
+      Description: "Allow service catalog actions on EMR, Cloudformation and Service Actions"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: servicecatalog.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${DeploymentName}_EMRLaunchConstrainRolePolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Sid: DeployEMR
+                Action:
+                  - "elasticmapreduce:*"
+                  - "cloudformation:*"
+                  - "servicecatalog:*"
+                  - "ec2:*"
+                  - "s3:Get*"
+                Resource: "*"
+              - Effect: Allow
+                Sid: MacroLambda
+                Action:
+                  - "lambda:*"
+                Resource: !ImportValue emr-capacity-macro-lambda
+              - Effect: Allow
+                Action:
+                  - "iam:PassRole"
+                Resource:
+                  - Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/EMR_DefaultRole"
+                  - Fn::Sub: "arn:aws:iam::${AWS::AccountId}:role/EMR_EC2_DefaultRole"
+  EMRTemplateProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties:
+      Description: "Sample EMR Template to be deployed in EMR Studio"
+      Distributor: !Sub ${DeploymentName}_Provider
+      Name: !Sub ${DeploymentName}_EMRProduct
+      Owner: "aws-samples"
+      ProvisioningArtifactParameters:
+        - Info:
+            LoadTemplateFromURL: !Sub "https://s3.${AWS::Region}.amazonaws.com/${TemplateS3Bucket}/sample-cluster-template-for-service-catalog.yaml"
+          Name: "Template002"
+      SupportDescription: "Sample template for reference only"
+  EMRTemplateProductAssociation1:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: !Ref EMRTemplateProduct
+  ServiceCatalogRoleConstrain1:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    Properties:
+      Description: "Use Cloudformation, EMR and ServiceCatalog"
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      ProductId: !Ref EMRTemplateProduct
+      RoleArn: !GetAtt ServiceCatalogLaunchConstrainRole.Arn
+  PortfolioPermissions:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref ServiceCatalogPortfolio
+      PrincipalARN: !Ref EMRStudioAdminRole
+      PrincipalType: IAM
